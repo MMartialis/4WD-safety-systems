@@ -1,8 +1,11 @@
 // status.h
 
 #pragma once
-
-#include <cstdint>
+#ifdef AVR // or whatever -- check the compiler docs, I don't know the standard way to check this offhand
+# include <stdint.h>
+#else
+# include <cstdint>
+#endif
 
 namespace VehicleStatus {
 

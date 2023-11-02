@@ -1,5 +1,6 @@
 // status.cpp
 
+#include <Arduino.h>
 #include "status.h"
 
 namespace VehicleStatus {
@@ -14,11 +15,11 @@ namespace VehicleStatus {
         if (is_valid_status(new_status)) {
             status = new_status;
         } else {
-            #if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_SAM) || defined(ARDUINO_ARCH_SAMD)
-                if (Serial && Serial.availableForWrite()) {
-                    Serial.println("Error: Invalid status value!");
-                }
-            #endif
+            // #if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_SAM) || defined(ARDUINO_ARCH_SAMD)
+            //     if (Serial && Serial.availableForWrite()) {
+            //         Serial.println("Error: Invalid status value!");
+            //     }
+            // #endif
         }
     }
 
