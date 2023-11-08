@@ -1,104 +1,41 @@
 // main.cpp
 
-#include <Arduino.h>
-// #include "status.h"
-
 #include <mcp_can.h>
-#include "vesc_can_bus_arduino.h"
+#include <SPI.h>
 
-#define pwm_micro_min 1108
-#define pwm_micro_max 1880
-#define pwm_micro_median 1500
+#include "vesc.hpp"
 
-float pwm_multiplier_pos = pow((pwm_micro_max - pwm_micro_median), -1);
-float pwm_multiplier_neg = pow((pwm_micro_median - pwm_micro_min), -1);
-
-#define PWM_PIN GPIO_NUM_2
-
-//CANBUS
-
-CAN can;             // get torque sensor data, throttle for now
-
-bool print_realtime_data;
-long last_print_data;
-
-
-
-
-
-// using namespace VehicleStatus;
-
-unsigned long last_time = micros();
-float lastvalue = 0;
-void pwm_interrupt()
-{
-  unsigned long time = micros();
-  lastvalue==0 ? lastvalue = 1 : lastvalue = 1;
-  // if ((time - last_time) < 3000)
-  // {
-  //   // int number = time - last_time - pwm_micro_median;
-  //   // if (abs(number) < 0.002)
-  //   // {
-  //   //   number = 0;
-  //   // }
-  //   // else if (number > 0)
-  //   // {
-  //   //   lastvalue = float(number) * pwm_multiplier_pos;
-  //   // }
-  //   // else
-  //   // {
-  //   //   lastvalue = float(number) * pwm_multiplier_neg;
-  //   // }
-  // }
-  last_time = time;
-}
+#define CAN0_INT 21
+MCP_CAN CAN0(5); // Set CS to pin 10
 
 void setup()
 {
-  // Create a Status variable
-  // Status status;
-
-  // // Set a new value for the status
-  // status.set_status(STATUS_IDLE);
-
-  // setup the serial port
   Serial.begin(115200);
-  // wait for the serial port to open
-  while (!Serial)
-  {
-    // wait for serial port to connect. Needed for native USB port only
-  }
-  pinMode(CAN0_INT, INPUT);
-  can.initialize();
+  while(!Serial); // Wait for serial port to connect
 
-  pinMode(PWM_PIN, INPUT);
-  // attach the interrupt to the pin
-  Serial.println("Attaching interrupt");
-  //attachInterrupt(digitalPinToInterrupt(PWM_PIN), pwm_interrupt, CHANGE);
-  Serial.println("Setup complete");
+  // Initialize MCP2515 running at 16MHz with a baudrate of 500kb/s and the masks and filters disabled.
+  if(CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK) Serial.println("MCP2515 Initialized Successfully!");
+  else Serial.println("Error Initializing MCP2515...");
+
+  CAN0.setMode(MCP_NORMAL);   // Change to normal mode to allow messages to be transmitted
 }
+
 
 void loop()
 {
-  //Serial.println(lastvalue, 3);
-  //delay(200);
-    can.spin();
-
-    //can.vesc_set_current(2); //2 amps of current
-
-    if (print_realtime_data == true)
-    {
-        if (millis() - last_print_data > 200)
-        {
-            Serial.print(can.erpm); 
-            Serial.print(can.inpVoltage);
-            Serial.print(can.dutyCycleNow);
-            Serial.print(can.avgInputCurrent);
-            Serial.print(can.avgMotorCurrent);
-            Serial.print(can.tempFET);
-            Serial.print(can.tempMotor);
-
-            last_print_data = millis();
-        }
-    }
+  delay(5000);
+  Serial.println("Sending CAN Message...");
+  for (int i = 0; i < 20; i++)
+  {
+    comm_can_set_duty(77, 0.2); 
+    comm_can_set_duty(53, 0.2); 
+    //comm_can_set_current(77);
+    delay(250);
+  }
+  Serial.println("sent");
+  delay(5000);
+  comm_can_set_duty(77, 0);
+  comm_can_set_duty(53, 0);
+  Serial.println("stopped");
+  delay(100000000);
 }
