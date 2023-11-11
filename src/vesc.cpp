@@ -5,11 +5,17 @@
 #include <SPI.h>
 #include "vesc.hpp"
 
+MCP_CAN CAN0(5);
+long unsigned int rxId;
+extern uint8_t len;
+uint8_t rxBuf[8];
+char msgString[128]; // Array to store serial string
+extern TaskHandle_t fasz;
 
 // Implementation for sending extended ID CAN-frames
 void can_transmit_eid(uint32_t id, const uint8_t *data, uint8_t len)
 {
-    CAN0.sendMsgBuf((unsigned long)id,(byte) 1,(byte) len,(byte * ) data);
+    CAN0.sendMsgBuf((unsigned long)id, (byte)1, (byte)len, (byte*)&data);
 }
 
 void buffer_append_int16(uint8_t *buffer, int16_t number, int32_t *index)
@@ -149,4 +155,28 @@ void comm_can_set_handbrake_rel(uint8_t controller_id, float current_rel)
     can_transmit_eid(controller_id |
                          ((uint32_t)CAN_PACKET_SET_CURRENT_HANDBRAKE_REL << 8),
                      buffer, send_index);
+}
+
+void comm_can_status_1(uint8_t controller_id)
+{
+    can_transmit_eid(controller_id |
+                         ((uint32_t)CAN_PACKET_STATUS_1 << 8),
+                     __null, __null);
+}
+
+void print_raw_can_data(void* penis)
+{
+    Serial.println("listening");
+    int8_t received = 4;
+    for (;received == 4;) received = CAN0.readMsgBuf(&rxId, &len, rxBuf);
+
+    sprintf(msgString, "Standard ID: 0x%.3lX       DLC: %d  Data:", rxId, len);
+    Serial.print(msgString);
+    for (byte i = 0; i < len; i++)
+    {
+        sprintf(msgString, " 0x%c", rxBuf[i]);
+    }
+    Serial.println(msgString);
+    std::fill_n(msgString, 128, 0);
+    vTaskDelete(fasz);
 }

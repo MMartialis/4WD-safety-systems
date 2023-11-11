@@ -2,7 +2,7 @@
 #include <SPI.h>
 #include "vesc_can_bus_arduino.h"
 
-MCP_CAN CAN0(41);                               // Set CS to pin 10
+MCP_CAN CAN0(5); // Set CS to pin 10
 
 void CAN::initialize() {
   CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ);

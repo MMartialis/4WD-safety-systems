@@ -10,7 +10,7 @@ public:
 // hátsó 40, 13
 // can baud rate 250
 
-
+extern MCP_CAN CAN0;
 
 #define CAN0_INT 21                              // Set INT to pin 21
 
@@ -28,7 +28,7 @@ void initialize();
 void spin();
 void get_frame(); // populates rxId and rxBuf with latest can frame 
 void can_send(byte data[8]); //transmits the send commands to the sensor
-void print_raw_can_data(); //output raw can data to terminal (debug)
+void print_raw_can_data(); //output raw can data to serial (debug)
 
 
 void vesc_set_duty(float duty);
