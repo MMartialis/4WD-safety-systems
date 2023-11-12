@@ -27,7 +27,6 @@ typedef enum
     CAN_PACKET_STATUS_5 = 27,
     CAN_PACKET_STATUS_6 = 28,
     CAN_PACKET_MAKE_ENUM_32_BITS = 0xFFFFFFFF,
-    CAN_PACKET_REQUEST = 0x40000000,
 } CAN_PACKET_ID;
 
 void buffer_append_int16(uint8_t *buffer, int16_t number, int32_t *index);

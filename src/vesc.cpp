@@ -12,12 +12,11 @@ uint8_t rxBuf[8];
 char msgString[128]; // Array to store serial string
 extern TaskHandle_t fasz;
 
-
 // Implementation for sending extended ID CAN-frames
 void can_transmit_eid(uint32_t id, const uint8_t *data, uint8_t len, uint8_t rtr)
 {
     portDISABLE_INTERRUPTS();
-    CAN0.sendMsgBuf((unsigned long) id, (byte)1, (byte)rtr, (byte)len, (byte*)data);
+    CAN0.sendMsgBuf((unsigned long)id, (byte)1, (byte)rtr, (byte)len, (byte *)data);
     portENABLE_INTERRUPTS();
 }
 
@@ -196,18 +195,21 @@ void comm_can_status_6(uint8_t controller_id)
     can_transmit_eid(controller_id | ((uint32_t)CAN_PACKET_STATUS_6 << 8), buffer, 0, 1);
 }
 
-void print_raw_can_data(void* penis)
+void print_raw_can_data(void *penis)
 {
     Serial.println("listening");
-    int8_t received = CAN0.readMsgBuf(&rxId, &len, rxBuf);
-
-    sprintf(msgString, "Standard ID: 0x%.3lX       DLC: %d  Data:", rxId, len);
-    Serial.print(msgString);
-    for (byte i = 0; i < len; i++)
+    int8_t counter = 1;
+    while (CAN0.readMsgBuf(&rxId, &len, rxBuf) != CAN_NOMSG)
     {
-        sprintf(msgString, " 0x%c", rxBuf[i]);
+        sprintf(msgString, "buffer %d Standard ID: 0x%.3lX       DLC: %d  Data:", counter, rxId, len);
+        Serial.print(msgString);
+        for (byte i = 0; i < len; i++)
+        {
+            sprintf(msgString, " 0x%.2X", rxBuf[i]);
+            Serial.print(msgString);
+        }
+        Serial.println();
+        counter --;
     }
-    Serial.println(msgString);
-    std::fill_n(msgString, 128, 0);
     vTaskDelete(fasz);
 }
