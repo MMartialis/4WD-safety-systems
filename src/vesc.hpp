@@ -1,11 +1,13 @@
 #include "mcp_can.h"
 
+#define CAN0_INT 21
+#define RX_MSG_BUFFER_LEN 8
 
 extern MCP_CAN CAN0;
 extern long unsigned int rxId;
 extern unsigned char len;
 extern unsigned char rxBuf[8];
-extern char msgString[128];// Array to store serial string
+extern char msgString[RX_MSG_BUFFER_LEN][128];// Array to store serial string
 
 void can_transmit_eid(uint32_t id, const uint8_t *data, uint8_t len);
 

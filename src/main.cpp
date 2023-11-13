@@ -2,35 +2,47 @@
 // can IDs
 // első 53, 77
 // hátsó jobb 40, bal 13
-
+#include "stdint.h"
 #include <mcp_can.h>
 #include <SPI.h>
 #include "vesc.hpp"
 
-#define CAN0_INT 21
-
 TaskHandle_t fasz;
 uint8_t len = 0;
 uint32_t intCd = 1;
-
+uint8_t ize = 0;
 // start print job on core 0
 void start_print_job()
-{ 
-  xTaskCreatePinnedToCore(
-    &print_raw_can_data,  /* Function to implement the task */
-    "print_raw_can_data", /* Name of the task */
-    10000,                 /* Stack size in words */
-    NULL,                 /* Task input parameter */
-    0,                    /* Priority of the task */
-    &fasz,                /* Task handle. */
-    0                     /* Core where the task should run */
-  );
+{
+  int8_t counter = 1;
+  for (; CAN0.readMsgBuf(&rxId, &len, rxBuf) != CAN_NOMSG;)
+  {
+    uint8_t msgId = ize%RX_MSG_BUFFER_LEN;
+    sprintf(msgString[msgId], "buffer %d Standard ID: 0x%.3lX       DLC: %d  Data:", counter, rxId, len);
+    for (byte i = 0; i < len; i++)
+    {
+      sprintf(msgString[msgId] + strlen(msgString[msgId]), " 0x%.2X", rxBuf[i]);
+    }
+    // Serial.println(msgString);
+    ize++;
+    counter--;
+  }
+  // xTaskCreatePinnedToCore(
+  //   &print_raw_can_data,  /* Function to implement the task */
+  //   "print_raw_can_data", /* Name of the task */
+  //   10000,                 /* Stack size in words */
+  //   NULL,                 /* Task input parameter */
+  //   0,                    /* Priority of the task */
+  //   &fasz,                /* Task handle. */
+  //   0                     /* Core where the task should run */
+  // );
 }
 
 void setup()
 {
   Serial.begin(250000);
-  while (!Serial); // Wait for serial port to connect
+  while (!Serial)
+    ; // Wait for serial port to connect
 
   // Initialize MCP2515 running at 16MHz with a baudrate of 500kb/s and the masks and filters disabled.
   if (CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK)
@@ -39,7 +51,7 @@ void setup()
     Serial.println("Error Initializing MCP2515...");
 
   CAN0.setMode(MCP_NORMAL); // Change to normal mode to allow messages to be transmitted
-  
+
   pinMode(CAN0_INT, INPUT);
   attachInterrupt(digitalPinToInterrupt(CAN0_INT), start_print_job, FALLING);
   Serial.println("Interrupt attached");
@@ -54,7 +66,12 @@ void loop()
   //   start_print_job();
 
   // }
-  delay(1000);
+  delay(10);
+  for (int8_t i = 0; i < RX_MSG_BUFFER_LEN; i++)
+  {
+    if (strlen(msgString[i]) > 0) {Serial.print(ize); Serial.println(msgString[i]);}
+    std::fill(msgString[i], msgString[i] + 128, 0);
+  }
   // Serial.println("Sending CAN Message...");
   // for (int i = 0; i < 20; i++)
   // {
