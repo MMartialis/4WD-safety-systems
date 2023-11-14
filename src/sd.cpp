@@ -3,18 +3,34 @@
 #include "sd.hpp"
 #include <SPI.h>
 #include <SD.h>
+#include <string>
 
 // CS    = 5;
 // MOSI  = 23;
 // MISO  = 19;
 // SCK   = 18;
 
-
-
 String dataString =""; // holds the data to be written to the SD card
-float sensorReading1 = 0.00; // value read from your first sensor
-float sensorReading2 = 0.00; // value read from your second sensor
-float sensorReading3 = 0.00; // value read from your third sensor
+
+// array
+float escData[12]; // duty, currentM, erpm
+float sdLoggingFloat[32]; // duty, currentM, erpm, tFET, tMot, tacho, Vbatt, Ibatt
+std::string sdLoggingString[32];
+
+void FillLogWithZeros(){
+    for (int i=0; i < 32; i++){
+        sdLoggingFloat[i]=0.00;
+    }
+}
+
+void LogFloatToString(){
+    for (int i=0; i<32; i++){
+        sdLoggingString[i] = std::to_string(sdLoggingFloat[i]);
+    }
+}
+
+
+
 File sensorData;
 
 

@@ -72,7 +72,8 @@ void setup()
       return;
   }
   Serial.println("card initialized");
-
+  // resetting undefined value floats to 0.00 for SD logging
+  FillLogWithZeros();
 
 
   xTaskCreatePinnedToCore(
