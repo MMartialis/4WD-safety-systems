@@ -1,4 +1,4 @@
-// status.h
+// status.hpp
 
 #pragma once
 #ifdef AVR // or whatever -- check the compiler docs, I don't know the standard way to check this offhand
