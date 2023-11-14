@@ -16,6 +16,7 @@
 
 #include <../include/mcp_can.h>
 #include <SPI.h>
+#include <BluetoothSerial.h>
 
 #include "vesc.hpp"
 #include "status.hpp"
@@ -23,8 +24,6 @@
 #include "can_comm.hpp"
 
 #define PWM_PIN GPIO_NUM_2
-
-using namespace VehicleStatus;
 
 extern char msgBuffer[RX_MSG_BUFFER_LEN][11];
 extern double lastPwmRead;
@@ -36,10 +35,12 @@ uint8_t msgCount = 0;
 bool print_realtime_data = 1;
 long last_print_data;
 
+VehicleStatus::Status Status; // initial status is "booting"
+BluetoothSerial SerialBt;
+
 void setup()
 {
   // Create a Status variable
-  Status status; // initial status is "booting"
 
   Serial.begin(115200);
   while (!Serial); // Wait for serial port to connect
@@ -74,10 +75,10 @@ void loop()
   {
     if (strlen(msgString[i]) > 0)
     {
-      Serial.print(ize);
+      Serial.print(msgCount);
       Serial.println(msgString[i]);
-      Serialbt.write(ize);
-      Serialbt.write((uint8_t *)msgString[i], strlen(msgString[i]));
+      SerialBt.write(msgCount);
+      SerialBt.write((uint8_t *)msgString[i], strlen(msgString[i]));
       Serial.println("Free memory: " + String(esp_get_free_heap_size()) + " bytes");
       }
     std::fill(msgString[i], msgString[i] + 128, 0);
