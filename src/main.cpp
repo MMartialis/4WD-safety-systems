@@ -10,7 +10,6 @@
 
 // #include <string>
 
-#include <../include/mcp_can.h>
 #include <SPI.h>
 #include <BluetoothSerial.h>
 
@@ -18,6 +17,7 @@
 #include "status.hpp"
 #include "pwm.hpp"
 #include "can_comm.hpp"
+#include "./mcp_can.h"
 
 // can IDs
 // első         53,     77
@@ -32,6 +32,7 @@
 
 extern char msgBuffer[RX_MSG_BUFFER_LEN][11];
 extern double lastPwmRead;
+extern MCP_CAN CAN0;
 
 TaskHandle_t Handler0;
 

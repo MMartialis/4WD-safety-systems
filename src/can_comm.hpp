@@ -1,4 +1,4 @@
-#include "../include/mcp_can.h"
+#include "mcp_can.h"
 
 extern MCP_CAN CAN0;
 

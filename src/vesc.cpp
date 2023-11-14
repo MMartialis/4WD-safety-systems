@@ -8,7 +8,8 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <algorithm>
-#include "../include/mcp_can.h"
+
+#include "mcp_can.h"
 #include "vesc.hpp"
 
 extern MCP_CAN CAN0;
