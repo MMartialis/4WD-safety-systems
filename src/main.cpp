@@ -37,10 +37,31 @@ void start_print_job()
   //   0                     /* Core where the task should run */
   // );
 }
+#include <string>
+#include <Arduino.h>
+#include "status.h"
+//#include "pwm.h"
+#include "vesc_can_bus_arduino.h"
+
+CAN can;             // get torque sensor data, throttle for now
+
+bool print_realtime_data = 1;
+long last_print_data;
+
+
+#define PWM_PIN GPIO_NUM_2
+
+// using namespace VehicleStatus;
+using namespace std;
+
 
 void setup()
 {
-  Serial.begin(250000);
+  // Create a Status variable
+  // Status status;
+
+
+  Serial.begin(115200);
   while (!Serial)
     ; // Wait for serial port to connect
 
