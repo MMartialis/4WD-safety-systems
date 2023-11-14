@@ -17,13 +17,16 @@
 #include <../include/mcp_can.h>
 #include <SPI.h>
 #include <BluetoothSerial.h>
+#include <SD.h>
 
 #include "vesc.hpp"
 #include "status.hpp"
 #include "pwm.hpp"
 #include "can_comm.hpp"
+#include "sd.hpp"
 
 #define PWM_PIN GPIO_NUM_2
+const int SDCSpin = 5;
 
 extern char msgBuffer[RX_MSG_BUFFER_LEN][11];
 extern double lastPwmRead;
@@ -57,6 +60,20 @@ void setup()
 
 
   CAN0.setMode(MCP_NORMAL); // Change to normal mode to allow messages to be transmitted
+
+
+
+  // Initialize SD card
+  pinMode(SDCSpin, OUTPUT);
+  Serial.print("Initializing SD card...");
+  // see if the card is present and can be initialized:
+  if (!SD.begin(SDCSpin)){
+      Serial.println("Card failed, or not present");
+      return;
+  }
+  Serial.println("card initialized");
+
+
 
   xTaskCreatePinnedToCore(
     &core_0_setup, /* Function to implement the task */
