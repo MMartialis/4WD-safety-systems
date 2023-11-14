@@ -62,6 +62,7 @@ void put_message_in_buffer()
         rxBuf[7]
     };
     std::copy(message, message + 11, msgBuffer[msgCount%RX_MSG_BUFFER_LEN]);
+    msgCount++;
     // uint8_t msgId = msgCount%RX_MSG_BUFFER_LEN;
     // sprintf(msgBuffer[msgId], "buffer %d Standard ID: 0x%.3lX       DLC: %d  Data:", counter, rxId, len);
     // for (byte i = 0; i < len; i++)
