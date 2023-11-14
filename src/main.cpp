@@ -71,18 +71,16 @@ void setup()
 
 void loop()
 {
-  for (int8_t i = 0; i < RX_MSG_BUFFER_LEN; i++)
-  {
-    if (strlen(msgString[i]) > 0)
-    {
-      Serial.print(msgCount);
-      Serial.println(msgString[i]);
-      SerialBt.write(msgCount);
-      SerialBt.write((uint8_t *)msgString[i], strlen(msgString[i]));
-      Serial.println("Free memory: " + String(esp_get_free_heap_size()) + " bytes");
-      }
-    std::fill(msgString[i], msgString[i] + 128, 0);
-  }
+  // for (int8_t i = 0; i < RX_MSG_BUFFER_LEN; i++)
+  // {
+  //   if (strlen(msgString[i]) > 0)
+  //   {
+  //     Serial.print(msgCount);
+  //     Serial.println(msgString[i]);
+  //     SerialBt.write(msgCount);
+  //     SerialBt.write((uint8_t *)msgString[i], strlen(msgString[i]));
+  //     Serial.println("Free memory: " + String(esp_get_free_heap_size()) + " bytes");
+  //     }
+  //   std::fill(msgString[i], msgString[i] + 128, 0);
+  // }
 }
-
-
