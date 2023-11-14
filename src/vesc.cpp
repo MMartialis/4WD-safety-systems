@@ -1,11 +1,14 @@
 // vesc.cpp
 
-#include <stdint.h>
+#ifdef AVR // or whatever -- check the compiler docs, I don't know the standard way to check this offhand
+# include <stdint.h>
+#else
+# include <cstdint>
+#endif
 #include <SPI.h>
 #include <algorithm>
-#include "mcp_can.h"
+#include "../include/mcp_can.h"
 #include "vesc.hpp"
-
 
 extern MCP_CAN CAN0;
 
