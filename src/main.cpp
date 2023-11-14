@@ -1,11 +1,17 @@
 // main.cpp
 
 // can IDs
-// első 53, 77
-// hátsó jobb 40, bal 13
+// első         53,     77
+// hátsó  jobb  40, bal 13
 
 #include <Arduino.h>
-#include "stdint.h"
+
+#ifdef AVR // or whatever -- check the compiler docs, I don't know the standard way to check this offhand
+# include <stdint.h>
+#else
+# include <cstdint>
+#endif
+
 #include <string>
 
 #include <../include/mcp_can.h>
@@ -58,6 +64,7 @@ long last_print_data;
 using namespace VehicleStatus;
 using namespace std;
 
+extern double lastPwmRead;
 
 void setup()
 {
@@ -68,16 +75,22 @@ void setup()
   Serial.begin(115200);
   while (!Serial); // Wait for serial port to connect
 
+  pinMode(CAN0_INT, INPUT);
+  pinMode(PWM_PIN, INPUT);
+
+
   // Initialize MCP2515 running at 16MHz with a baudrate of 500kb/s and the masks and filters disabled.
   if (CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK)
     Serial.println("MCP2515 Initialized Successfully!");
   else
     Serial.println("Error Initializing MCP2515...");
 
+
   CAN0.setMode(MCP_NORMAL); // Change to normal mode to allow messages to be transmitted
 
-  pinMode(CAN0_INT, INPUT);
   attachInterrupt(digitalPinToInterrupt(CAN0_INT), start_print_job, FALLING);
+  attachInterrupt(digitalPinToInterrupt(PWM_PIN), pwm_interrupt, CHANGE);
+
   Serial.println("Interrupt attached");
   start_print_job();
 }
