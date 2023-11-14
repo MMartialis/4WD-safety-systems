@@ -37,6 +37,39 @@ long last_print_data;
 using namespace VehicleStatus;
 
 extern double lastPwmRead;
+#include <BluetoothSerial.h>
+
+TaskHandle_t fasz;
+uint8_t len = 0;
+uint32_t intCd = 1;
+uint8_t ize = 0;
+BluetoothSerial Serialbt;
+// start print job on core 0
+void start_print_job()
+{
+  int8_t counter = 1; //indicates the RXnB address
+  for (; CAN0.readMsgBuf(&rxId, &len, rxBuf) != CAN_NOMSG;)
+  {
+    uint8_t msgId = ize%RX_MSG_BUFFER_LEN;
+    sprintf(msgString[msgId], "buffer %d Standard ID: 0x%.3lX       DLC: %d  Data:", counter, rxId, len);
+    for (byte i = 0; i < len; i++)
+    {
+      sprintf(msgString[msgId] + strlen(msgString[msgId]), " 0x%.2X", rxBuf[i]);
+    }
+    // Serial.println(msgString);
+    ize++;
+    counter--;
+  }
+  // xTaskCreatePinnedToCore(
+  //   &print_raw_can_data,  /* Function to implement the task */
+  //   "print_raw_can_data", /* Name of the task */
+  //   10000,                 /* Stack size in words */
+  //   NULL,                 /* Task input parameter */
+  //   0,                    /* Priority of the task */
+  //   &fasz,                /* Task handle. */
+  //   0                     /* Core where the task should run */
+  // );
+}
 
 void setup()
 {
@@ -76,9 +109,16 @@ void loop()
 {
   for (int8_t i = 0; i < RX_MSG_BUFFER_LEN; i++)
   {
-    if (strlen(msgBuffer[i]) > 0) {
-      // do something with msgString[i]
-    }
-    std::fill(msgBuffer[i], msgBuffer[i] + 128, 0);
+    if (strlen(msgString[i]) > 0)
+    {
+      Serial.print(ize);
+      Serial.println(msgString[i]);
+      Serialbt.write(ize);
+      Serialbt.write((uint8_t *)msgString[i], strlen(msgString[i]));
+      Serial.println("Free memory: " + String(esp_get_free_heap_size()) + " bytes");
+      }
+    std::fill(msgString[i], msgString[i] + 128, 0);
   }
 }
+
+
