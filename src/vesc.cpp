@@ -50,7 +50,7 @@ void put_message_in_buffer()
   {
     const char message[11] = {
         (byte) rxId >> 8,
-        (byte) rxId << 24,
+        (byte) rxId,
         (byte) len,
         rxBuf[0],
         rxBuf[1],

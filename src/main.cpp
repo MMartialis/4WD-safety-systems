@@ -12,7 +12,7 @@
 # include <cstdint>
 #endif
 
-#include <string>
+// #include <string>
 
 #include <../include/mcp_can.h>
 #include <SPI.h>
