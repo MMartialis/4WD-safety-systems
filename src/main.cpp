@@ -1,11 +1,19 @@
 // main.cpp
+
 // can IDs
 // első 53, 77
 // hátsó jobb 40, bal 13
+
+#include <Arduino.h>
 #include "stdint.h"
-#include <mcp_can.h>
+#include <string>
+
+#include <../include/mcp_can.h>
 #include <SPI.h>
+
 #include "vesc.hpp"
+#include "status.hpp"
+#include "pwm.hpp"
 
 TaskHandle_t fasz;
 uint8_t len = 0;
@@ -37,13 +45,9 @@ void start_print_job()
   //   0                     /* Core where the task should run */
   // );
 }
-#include <string>
-#include <Arduino.h>
-#include "status.h"
-//#include "pwm.h"
-#include "vesc_can_bus_arduino.h"
 
-CAN can;             // get torque sensor data, throttle for now
+
+// get torque sensor data, throttle for now
 
 bool print_realtime_data = 1;
 long last_print_data;
@@ -51,19 +55,18 @@ long last_print_data;
 
 #define PWM_PIN GPIO_NUM_2
 
-// using namespace VehicleStatus;
+using namespace VehicleStatus;
 using namespace std;
 
 
 void setup()
 {
   // Create a Status variable
-  // Status status;
+  Status status;
 
 
   Serial.begin(115200);
-  while (!Serial)
-    ; // Wait for serial port to connect
+  while (!Serial); // Wait for serial port to connect
 
   // Initialize MCP2515 running at 16MHz with a baudrate of 500kb/s and the masks and filters disabled.
   if (CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK)

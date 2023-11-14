@@ -1,4 +1,7 @@
+// pwm.cpp
+
 #include <Arduino.h>
+#include "pwm.hpp"
 
 #define pwm_micro_min 1108
 #define pwm_micro_max 1880

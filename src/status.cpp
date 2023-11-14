@@ -1,7 +1,7 @@
 // status.cpp
 
 #include <Arduino.h>
-#include "status.h"
+#include "status.hpp"
 
 namespace VehicleStatus {
 
