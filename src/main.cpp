@@ -22,7 +22,7 @@
 #include "pwm.hpp"
 #include "can_comm.hpp"
 
-extern char msgBuffer[RX_MSG_BUFFER_LEN][128];
+extern char msgBuffer[RX_MSG_BUFFER_LEN][11];
 
 TaskHandle_t Handler0;
 

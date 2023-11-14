@@ -9,7 +9,7 @@ extern MCP_CAN CAN0;
 extern long unsigned int rxId;
 extern unsigned char len;
 extern unsigned char rxBuf[8];
-extern char msgString[RX_MSG_BUFFER_LEN][128];// Array to store serial string
+extern char msgString[RX_MSG_BUFFER_LEN][11];// Array to store serial string
 
 // void print_raw_can_data(void* params);
 
