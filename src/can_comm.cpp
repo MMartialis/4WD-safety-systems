@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <SPI.h>
-#include "mcp_can.h"
+#include "../include/mcp_can.h"
 #include "can_comm.hpp"
 
 MCP_CAN CAN0(5);

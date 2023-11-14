@@ -1,9 +1,9 @@
 //vesc.hpp
 
-#include "mcp_can.h"
+#include "../include/mcp_can.h"
 
 #define CAN0_INT 21
-#define RX_MSG_BUFFER_LEN 8
+#define RX_MSG_BUFFER_LEN 11
 
 extern MCP_CAN CAN0;
 extern long unsigned int rxId;

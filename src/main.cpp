@@ -16,13 +16,17 @@
 
 #include <../include/mcp_can.h>
 #include <SPI.h>
+#include <BluetoothSerial.h>
 
 #include "vesc.hpp"
 #include "status.hpp"
 #include "pwm.hpp"
 #include "can_comm.hpp"
 
+#define PWM_PIN GPIO_NUM_2
+
 extern char msgBuffer[RX_MSG_BUFFER_LEN][11];
+extern double lastPwmRead;
 
 TaskHandle_t Handler0;
 
@@ -31,57 +35,18 @@ uint8_t msgCount = 0;
 bool print_realtime_data = 1;
 long last_print_data;
 
-
-#define PWM_PIN GPIO_NUM_2
-
-using namespace VehicleStatus;
-
-extern double lastPwmRead;
-#include <BluetoothSerial.h>
-
-TaskHandle_t fasz;
-uint8_t len = 0;
-uint32_t intCd = 1;
-uint8_t ize = 0;
-BluetoothSerial Serialbt;
-// start print job on core 0
-void start_print_job()
-{
-  int8_t counter = 1; //indicates the RXnB address
-  for (; CAN0.readMsgBuf(&rxId, &len, rxBuf) != CAN_NOMSG;)
-  {
-    uint8_t msgId = ize%RX_MSG_BUFFER_LEN;
-    sprintf(msgString[msgId], "buffer %d Standard ID: 0x%.3lX       DLC: %d  Data:", counter, rxId, len);
-    for (byte i = 0; i < len; i++)
-    {
-      sprintf(msgString[msgId] + strlen(msgString[msgId]), " 0x%.2X", rxBuf[i]);
-    }
-    // Serial.println(msgString);
-    ize++;
-    counter--;
-  }
-  // xTaskCreatePinnedToCore(
-  //   &print_raw_can_data,  /* Function to implement the task */
-  //   "print_raw_can_data", /* Name of the task */
-  //   10000,                 /* Stack size in words */
-  //   NULL,                 /* Task input parameter */
-  //   0,                    /* Priority of the task */
-  //   &fasz,                /* Task handle. */
-  //   0                     /* Core where the task should run */
-  // );
-}
+VehicleStatus::Status Status; // initial status is "booting"
+BluetoothSerial SerialBt;
 
 void setup()
 {
   // Create a Status variable
-  Status status;
-
 
   Serial.begin(115200);
   while (!Serial); // Wait for serial port to connect
 
-  pinMode(CAN0_INT, INPUT);
   pinMode(PWM_PIN, INPUT);
+  attachInterrupt(digitalPinToInterrupt(PWM_PIN), pwm_interrupt, CHANGE);
 
 
   // Initialize MCP2515 running at 16MHz with a baudrate of 500kb/s and the masks and filters disabled.
@@ -90,14 +55,13 @@ void setup()
   else
     Serial.println("Error Initializing MCP2515...");
 
-  attachInterrupt(digitalPinToInterrupt(PWM_PIN), pwm_interrupt, CHANGE);
 
   CAN0.setMode(MCP_NORMAL); // Change to normal mode to allow messages to be transmitted
 
   xTaskCreatePinnedToCore(
     &core_0_setup, /* Function to implement the task */
     "setup",       /* Name of the task */
-    10000,         /* Stack size in words */
+    500,         /* Stack size in words */
     NULL,          /* Task input parameter */
     3,             /* Priority of the task */
     &Handler0,     /* Task handle. */
@@ -111,10 +75,10 @@ void loop()
   {
     if (strlen(msgString[i]) > 0)
     {
-      Serial.print(ize);
+      Serial.print(msgCount);
       Serial.println(msgString[i]);
-      Serialbt.write(ize);
-      Serialbt.write((uint8_t *)msgString[i], strlen(msgString[i]));
+      SerialBt.write(msgCount);
+      SerialBt.write((uint8_t *)msgString[i], strlen(msgString[i]));
       Serial.println("Free memory: " + String(esp_get_free_heap_size()) + " bytes");
       }
     std::fill(msgString[i], msgString[i] + 128, 0);
