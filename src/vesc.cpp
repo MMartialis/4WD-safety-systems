@@ -12,7 +12,6 @@
 #include "vesc.hpp"
 
 extern MCP_CAN CAN0;
-
 extern TaskHandle_t Handler0;
 extern uint8_t msgCount;
 
