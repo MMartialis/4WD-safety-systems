@@ -1,9 +1,5 @@
 // main.cpp
 
-// can IDs
-// első         53,     77
-// hátsó  jobb  40, bal 13
-
 #include <Arduino.h>
 
 #ifdef AVR // or whatever -- check the compiler docs, I don't know the standard way to check this offhand
@@ -23,6 +19,15 @@
 #include "pwm.hpp"
 #include "can_comm.hpp"
 
+// can IDs
+// első         53,     77
+// hátsó  jobb  40, bal 13
+
+#define ESC_FR 53
+#define ESC_FL 77
+#define ESC_BR 40
+#define ESC_BL 13
+
 #define PWM_PIN GPIO_NUM_2
 
 extern char msgBuffer[RX_MSG_BUFFER_LEN][11];
@@ -37,6 +42,8 @@ long last_print_data;
 
 VehicleStatus::Status Status; // initial status is "booting"
 BluetoothSerial SerialBt;
+
+
 
 void setup()
 {
@@ -55,13 +62,13 @@ void setup()
   else
     Serial.println("Error Initializing MCP2515...");
 
-
+  SerialBt.begin("ESP32test"); //Bluetooth device name
   CAN0.setMode(MCP_NORMAL); // Change to normal mode to allow messages to be transmitted
 
   xTaskCreatePinnedToCore(
     &core_0_setup, /* Function to implement the task */
     "setup",       /* Name of the task */
-    500,         /* Stack size in words */
+    1000,         /* Stack size in words */
     NULL,          /* Task input parameter */
     3,             /* Priority of the task */
     &Handler0,     /* Task handle. */
@@ -71,16 +78,9 @@ void setup()
 
 void loop()
 {
-  // for (int8_t i = 0; i < RX_MSG_BUFFER_LEN; i++)
-  // {
-  //   if (strlen(msgString[i]) > 0)
-  //   {
-  //     Serial.print(msgCount);
-  //     Serial.println(msgString[i]);
-  //     SerialBt.write(msgCount);
-  //     SerialBt.write((uint8_t *)msgString[i], strlen(msgString[i]));
-  //     Serial.println("Free memory: " + String(esp_get_free_heap_size()) + " bytes");
-  //     }
-  //   std::fill(msgString[i], msgString[i] + 128, 0);
-  // }
+  delay(4000);
+  comm_can_set_duty(ESC_FR, 0.1);
+  delay (1000);
+  comm_can_set_duty(ESC_FR, 0);
+  delay(4000000000);
 }

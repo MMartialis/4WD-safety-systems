@@ -1,4 +1,4 @@
-#include "mcp_can.h"
+#include "../include/mcp_can.h"
 
 extern MCP_CAN CAN0;
 extern long unsigned int rxId;

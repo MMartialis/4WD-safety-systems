@@ -19,7 +19,8 @@ namespace VehicleStatus {
         STATUS_BRAKING,
         STATUS_CORRECTION,
         STATUS_ERROR,
-        STATUS_TESTING
+        STATUS_TESTING,
+        STATUS_ESTOP
     };
 
     class Status {
