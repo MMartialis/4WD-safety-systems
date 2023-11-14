@@ -5,9 +5,11 @@
 #else
 #include <cstdint>
 #endif
+#include <Arduino.h>
 #include <SPI.h>
 #include <algorithm>
-#include "../include/mcp_can.h"
+
+#include "mcp_can.h"
 #include "vesc.hpp"
 
 extern MCP_CAN CAN0;
@@ -42,7 +44,7 @@ void core_0_setup(void *params)
 {
     pinMode(CAN0_INT, INPUT);
     attachInterrupt(digitalPinToInterrupt(CAN0_INT), put_message_in_buffer, FALLING);
-    Serial.println("Interrupt attached");
+    // Serial.println("Interrupt attached");
     vTaskDelete(Handler0);
 }
 
@@ -51,7 +53,7 @@ void put_message_in_buffer()
     for (; CAN0.readMsgBuf(&rxId, &len, rxBuf) != CAN_NOMSG;)
     {
         const char message[11] = {
-            (byte)rxId >> 8,
+            (byte) (rxId >> 8),
             (byte)rxId,
             (byte)len,
             rxBuf[0],
