@@ -3,10 +3,15 @@
 #include <string>
 #include <algorithm>
 
-extern float escData[12]; // duty, currentM, erpm
-extern float sdLoggingFloat[32]; // duty, currentM, erpm, tFET, tMot, tacho, Vbatt, Ibatt
-extern std::string sdLoggingString[32];
+
+#define LOG_LENGTH 32
+
+
+extern float sdLoggingFloat[LOG_LENGTH]; // duty, currentM, erpm, tFET, tMot, tacho, Vbatt, Ibatt
+//extern float escData[12]; // duty, currentM, erpm
+
+
 
 void FillLogWithZeros();
-void LogFloatToString();
+void LogAppendValues();
 void saveData();

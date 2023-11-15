@@ -1,4 +1,6 @@
 // sd.cpp
+// inspiration from https://rydepier.wordpress.com/2015/08/07/using-an-sd-card-reader-
+//to-store-and-retrieve-data-with-arduino/
 
 #include "sd.hpp"
 #include <SPI.h>
@@ -11,28 +13,27 @@
 // SCK   = 18;
 
 String dataString =""; // holds the data to be written to the SD card
-
+std::string myDataString = "";
 // array
-float escData[12]; // duty, currentM, erpm
-float sdLoggingFloat[32]; // duty, currentM, erpm, tFET, tMot, tacho, Vbatt, Ibatt
-std::string sdLoggingString[32];
+//float escData[12]; // duty, currentM, erpm
+float sdLoggingFloat[LOG_LENGTH]; // duty, currentM, erpm, tFET, tMot, tacho, Vbatt, Ibatt
 
 void FillLogWithZeros(){
-    for (int i=0; i < 32; i++){
+    for (int i=0; i < LOG_LENGTH; i++){
         sdLoggingFloat[i]=0.00;
     }
 }
 
-void LogFloatToString(){
-    for (int i=0; i<32; i++){
-        sdLoggingString[i] = std::to_string(sdLoggingFloat[i]);
+void LogAppendValues(){
+    for(int i=0; i<LOG_LENGTH-1; i++){
+        dataString += String(sdLoggingFloat[i]) + ",";
     }
+    dataString += String(sdLoggingFloat[LOG_LENGTH-1]);
 }
 
 
 
 File sensorData;
-
 
 void saveData(){
     if(SD.exists("data.csv")){ // check the card is still there
