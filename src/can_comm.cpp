@@ -1,6 +1,6 @@
 #include "can_comm.hpp"
 
-MCP_CAN CAN0(5);
+MCP_CAN CAN0(CAN0_CS); // Set CS pin for canbus is set to pin 5
 
 
 // Implementation for sending extended ID CAN-frames

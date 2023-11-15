@@ -32,13 +32,13 @@
 
 extern char msgBuffer[RX_MSG_BUFFER_LEN][11];
 extern double lastPwmRead;
-extern MCP_CAN CAN0;
+extern MCP_CAN CAN0;  // can controller
 
-TaskHandle_t Handler0;
+TaskHandle_t Handler0;  // core 0 task handler
 
 uint8_t msgCount = 0;
 
-bool print_realtime_data = 1;
+// bool print_realtime_data = 1; // function is not used
 long last_print_data;
 
 VehicleStatus::Status Status; // initial status is "booting"
@@ -63,7 +63,7 @@ void setup()
   else
     Serial.println("Error Initializing MCP2515...");
 
-  SerialBt.begin("ESP32test"); //Bluetooth device name
+  SerialBt.begin("ESP32test"); // Bluetooth device name
   CAN0.setMode(MCP_NORMAL); // Change to normal mode to allow messages to be transmitted
 
   xTaskCreatePinnedToCore(
@@ -79,9 +79,5 @@ void setup()
 
 void loop()
 {
-  delay(4000);
-  comm_can_set_duty(ESC_FR, 0.1);
-  delay (1000);
-  comm_can_set_duty(ESC_FR, 0);
-  delay(4000000000);
+  
 }

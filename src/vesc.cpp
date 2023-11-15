@@ -44,7 +44,7 @@ void core_0_setup(void *params)
 {
     pinMode(CAN0_INT, INPUT);
     attachInterrupt(digitalPinToInterrupt(CAN0_INT), put_message_in_buffer, FALLING);
-    // Serial.println("Interrupt attached");
+    Serial.println("Interrupt attached");
     vTaskDelete(Handler0);
 }
 
