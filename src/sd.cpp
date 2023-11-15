@@ -33,22 +33,37 @@ void LogAppendValues(){
 
 
 
-File sensorData;
+File sensorDataLog;
 
-void saveData(){
+void saveDataLog(){
     if(SD.exists("data.csv")){ // check the card is still there
         // now append new data file
-        sensorData = SD.open("data.csv", FILE_WRITE);
-        if (sensorData){
-            sensorData.println(dataString);
-            sensorData.close(); // close the file
+        sensorDataLog = SD.open("data.csv", FILE_WRITE);
+        if (sensorDataLog){
+            sensorDataLog.println(dataString);
+            sensorDataLog.close(); // close the file
         }
     }
-    else{
-        Serial.println("Error writing to file !");
-    }
+    // else{
+    //     Serial.println("Error writing to file !");
+    // }
 }
 
+File aiParameter;
+
+void saveAiParameter(){
+    if(SD.exists("ai.csv")){ // check the card is still there
+        // now append new data file
+        aiParameter = SD.open("ai.csv", FILE_WRITE);
+        if (aiParameter){
+            aiParameter.println(dataString);
+            aiParameter.close(); // close the file
+        }
+    }
+    // else{
+    //     Serial.println("Error writing to file !");
+    // }
+}
 
 // void setup()
 // {

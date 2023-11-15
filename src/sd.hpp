@@ -14,4 +14,5 @@ extern float sdLoggingFloat[LOG_LENGTH]; // duty, currentM, erpm, tFET, tMot, ta
 
 void FillLogWithZeros();
 void LogAppendValues();
-void saveData();
+void saveDataLog();
+void saveAiParameter();
