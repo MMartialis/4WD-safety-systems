@@ -13,7 +13,9 @@
 // SCK   = 18;
 
 String dataString =""; // holds the data to be written to the SD card
-std::string myDataString = "";
+//std::string myDataString = "";
+char dataLogFileName[12] = {'d','a','t','a','0','0','0','0','.','c','s','v'};
+
 // array
 //float escData[12]; // duty, currentM, erpm
 float sdLoggingFloat[LOG_LENGTH]; // duty, currentM, erpm, tFET, tMot, tacho, Vbatt, Ibatt
@@ -31,23 +33,35 @@ void LogAppendValues(){
     dataString += String(sdLoggingFloat[LOG_LENGTH-1]);
 }
 
+char* findDataLogFileName(){
+    for(int i=0; i<10000; i++){
+        dataLogFileName[7] = '0' + i % 10;
+        dataLogFileName[6] = '0' + (i % 100 - i % 10) / 10;
+        dataLogFileName[5] = '0' + (i % 1000 - i % 100) / 100;
+        dataLogFileName[4] = '0' + (i % 10000 - i % 1000) / 1000;
 
-
-File sensorDataLog;
-
-void saveDataLog(){
-    if(SD.exists("data.csv")){ // check the card is still there
-        // now append new data file
-        sensorDataLog = SD.open("data.csv", FILE_WRITE);
-        if (sensorDataLog){
-            sensorDataLog.println(dataString);
-            sensorDataLog.close(); // close the file
+        if(!SD.exists(dataLogFileName)){
+            return dataLogFileName; 
         }
     }
-    // else{
-    //     Serial.println("Error writing to file !");
-    // }
+    return dataLogFileName;
 }
+
+// File sensorDataLog;
+
+// void saveDataLog(){
+// if(SD.exists(dataLogFileName)){ // check the card is still there
+//     // now append new data file
+//     sensorDataLog = SD.open(dataLogFileName, FILE_WRITE);
+//     if (sensorDataLog){
+//         sensorDataLog.println(dataString);
+//         sensorDataLog.close(); // close the file
+//     }
+// }
+// // else{
+// //     Serial.println("Error writing to file !");
+// // }
+// }
 
 File aiParameter;
 
