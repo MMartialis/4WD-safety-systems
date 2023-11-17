@@ -13,6 +13,7 @@
 // SCK   = 18;
 
 String dataString =""; // holds the data to be written to the SD card
+String aiString ="";
 //std::string myDataString = "";
 char dataLogFileName[12] = {'d','a','t','a','0','0','0','0','.','c','s','v'};
 
@@ -47,21 +48,21 @@ char* findDataLogFileName(){
     return dataLogFileName;
 }
 
-// File sensorDataLog;
+File sensorDataLog;
 
-// void saveDataLog(){
-// if(SD.exists(dataLogFileName)){ // check the card is still there
-//     // now append new data file
-//     sensorDataLog = SD.open(dataLogFileName, FILE_WRITE);
-//     if (sensorDataLog){
-//         sensorDataLog.println(dataString);
-//         sensorDataLog.close(); // close the file
-//     }
+void saveDataLog(){
+if(SD.exists(dataLogFileName)){ // check the card is still there
+    // now append new data file
+    sensorDataLog = SD.open(dataLogFileName, FILE_WRITE);
+    if (sensorDataLog){
+        sensorDataLog.println(dataString);
+        sensorDataLog.close(); // close the file
+    }
+}
+// else{
+//     Serial.println("Error writing to file !");
 // }
-// // else{
-// //     Serial.println("Error writing to file !");
-// // }
-// }
+}
 
 File aiParameter;
 
@@ -70,7 +71,7 @@ void saveAiParameter(){
         // now append new data file
         aiParameter = SD.open("ai.csv", FILE_WRITE);
         if (aiParameter){
-            aiParameter.println(dataString);
+            aiParameter.println(aiString);
             aiParameter.close(); // close the file
         }
     }
@@ -78,6 +79,22 @@ void saveAiParameter(){
     //     Serial.println("Error writing to file !");
     // }
 }
+std::string readAiParameter(){
+    if (SD.exists("ai.csv")) {
+
+        if (aiParameter) {
+            std::string result = {char(aiParameter.read())}; // really not sure if it works
+            aiParameter.close();
+            return result;
+        } else {
+            return "failed to read";
+        }
+        
+    }
+}
+
+
+
 
 // void setup()
 // {
