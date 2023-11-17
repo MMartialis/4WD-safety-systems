@@ -13,7 +13,7 @@ void CAN::initialize() {
 void CAN::spin() {
   get_frame();
 
-  if (rxId == 0x8000090A) { //
+  if (rxId == 0x8000090A) { // CAN_PACKET_STATUS
     dutyCycleNow = process_data_frame_vesc('D', rxBuf[6], rxBuf[7]);
     avgMotorCurrent = process_data_frame_vesc('C', rxBuf[4], rxBuf[5]);
     unsigned char erpmvals[4];
@@ -79,35 +79,6 @@ int CAN::hex2int(char buf[])
   return (short) strtol(buf, NULL, 16);
 }
 
-void CAN::vesc_set_duty(float duty) {
-  uint32_t set_value = duty * 100000;
-  uint8_t buffer[4];
-  buffer[0] = (set_value >> 24) & 0xFF;
-  buffer[1] = (set_value >> 16) & 0xFF;
-  buffer[2] = (set_value  >> 8  )  & 0xFF;
-  buffer[3] = set_value & 0xFF;
-  byte sndStat = CAN0.sendMsgBuf(0x0000000A, 1, 4, buffer);
-}
-
-void CAN::vesc_set_current(float current) {
-  uint32_t set_value = current * 1000;
-  uint8_t buffer[4];
-  buffer[0] = (set_value >> 24) & 0xFF;
-  buffer[1] = (set_value >> 16) & 0xFF;
-  buffer[2] = (set_value  >> 8  )  & 0xFF;
-  buffer[3] = set_value & 0xFF;
-  byte sndStat = CAN0.sendMsgBuf(0x0000010A, 1, 4, buffer);
-}
-
-void CAN::vesc_set_erpm(float erpm) {
-  uint32_t set_value = erpm;
-  uint8_t buffer[4];
-  buffer[0] = (set_value >> 24) & 0xFF;
-  buffer[1] = (set_value >> 16) & 0xFF;
-  buffer[2] = (set_value  >> 8  )  & 0xFF;
-  buffer[3] = set_value & 0xFF;
-  byte sndStat = CAN0.sendMsgBuf(0x0000030A, 1, 4, buffer);
-}
 void CAN::get_frame() {
   CAN0.readMsgBuf(&rxId, &len, rxBuf);      // Read data: len = data length, buf = data byte(s)
 }

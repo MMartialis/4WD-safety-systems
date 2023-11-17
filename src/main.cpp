@@ -27,10 +27,11 @@
 #define ESC_FL 77
 #define ESC_BR 40
 #define ESC_BL 13
+#define BT_CAN 174
 
 #define PWM_PIN GPIO_NUM_2
 
-extern char msgBuffer[RX_MSG_BUFFER_LEN][11];
+extern char msgBuffer[RX_MSG_BUFFER_LEN][12];
 extern double lastPwmRead;
 extern MCP_CAN CAN0;  // can controller
 
@@ -44,12 +45,30 @@ long last_print_data;
 VehicleStatus::Status Status; // initial status is "booting"
 BluetoothSerial SerialBt;
 
+MotorControl::Motor MotorFr(ESC_FR);
+MotorControl::Motor MotorFl(ESC_FL);
+MotorControl::Motor MotorBr(ESC_BR);
+MotorControl::Motor MotorBl(ESC_BL);
+
+// dictionary for motor id and motor object
+std::map<uint8_t, MotorControl::Motor> motors = {
+  {ESC_FR, MotorFr},
+  {ESC_FL, MotorFl},
+  {ESC_BR, MotorBr},
+  {ESC_BL, MotorBl}
+};
+
+MotorControl::Motor get_motor_by_id(uint8_t id) {
+  return motors.at(id);
+}
 
 
 void setup()
 {
   // Create a Status variable
-
+  for(int i = 0; i < RX_MSG_BUFFER_LEN; i++) {
+    msgBuffer[i][11] = 0x01;
+  }
   Serial.begin(115200);
   while (!Serial); // Wait for serial port to connect
 
@@ -75,9 +94,20 @@ void setup()
     &Handler0,     /* Task handle. */
     0              /* Core where the task should run */
   );
+
+
+
 }
 
 void loop()
 {
-  
+  for (int i = msgCount%RX_MSG_BUFFER_LEN; msgBuffer[i][11] == 0x01; i--) {
+    // if id in motors
+    if (motors.find((byte) msgBuffer[i][1]) != motors.end()) {
+
+      Serial.println(get_motor_by_id((byte) msgBuffer[i][1]).update_can_data(&msgBuffer[i]));
+    }
+  }
+  delay(50);
 }
+
