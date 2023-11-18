@@ -53,7 +53,7 @@ void put_message_in_buffer()
     for (; CAN0.readMsgBuf(&rxId, &len, rxBuf) != CAN_NOMSG;)
     {
         const char message[11] = {
-            (byte) (rxId >> 8),
+            (byte)(rxId >> 8),
             (byte)rxId,
             (byte)len,
             rxBuf[0],
@@ -64,13 +64,6 @@ void put_message_in_buffer()
             rxBuf[5],
             rxBuf[6],
             rxBuf[7]};
-        std::copy(message, message + 11, msgBuffer[msgCount % RX_MSG_BUFFER_LEN]);
-        msgCount++;
-        // uint8_t msgId = msgCount%RX_MSG_BUFFER_LEN;
-        // sprintf(msgBuffer[msgId], "buffer %d Standard ID: 0x%.3lX       DLC: %d  Data:", counter, rxId, len);
-        // for (byte i = 0; i < len; i++)
-        // {
-        //   sprintf(msgBuffer[msgId] + strlen(msgBuffer[msgId]), " 0x%.2X", rxBuf[i]);
-        // }
+        std::copy(message, message + 11, msgBuffer[++msgCount % RX_MSG_BUFFER_LEN]);
     }
 }
