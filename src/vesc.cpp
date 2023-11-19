@@ -21,25 +21,6 @@ uint8_t len = 0;
 uint8_t rxBuf[8];
 char msgBuffer[RX_MSG_BUFFER_LEN][11]; // [command id, rxId, len, data1, data2, data3, data4, data5, data6, data7, data8]
 
-// void print_raw_can_data(void *params)
-// {
-
-//     uint8_t counter = 1;
-//     for (;CAN0.readMsgBuf(&rxId, &len, rxBuf) != CAN_NOMSG;)
-//     {
-//         sprintf(msgString, "buffer %d Standard ID: 0x%.3lX       DLC: %d  Data:", counter, rxId, len);
-//         for (byte i = 0; i < len; i++)
-//         {
-//             sprintf(msgString + strlen(msgString), " 0x%.2X", rxBuf[i]);
-//         }
-
-//         // Serial.println(msgString);
-//         ize ++;
-//         counter --;
-//     }
-//     vTaskDelete(Handler0);
-// }
-
 void core_0_setup(void *params)
 {
     pinMode(CAN0_INT, INPUT);
