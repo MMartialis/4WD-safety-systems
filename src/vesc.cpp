@@ -51,9 +51,9 @@ void put_message_in_buffer()
     for (; CAN0.readMsgBuf(&rxId, &len, rxBuf) != CAN_NOMSG;)
     {
         const char message[11] = {
-            (byte)rxId >> 8,
-            (byte)rxId,
-            (byte)len,
+            (byte) (rxId >> 8),
+            (byte) rxId,
+            (byte) len,
             rxBuf[0],
             rxBuf[1],
             rxBuf[2],

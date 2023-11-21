@@ -20,7 +20,6 @@
 #include <SD.h>
 
 #include "vesc.hpp"
-#include "status.hpp"
 #include "pwm.hpp"
 #include "can_comm.hpp"
 #include "sd.hpp"
@@ -38,12 +37,10 @@ uint8_t msgCount = 0;
 bool print_realtime_data = 1;
 long last_print_data;
 
-VehicleStatus::Status Status; // initial status is "booting"
 BluetoothSerial SerialBt;
 
 void setup()
 {
-  // Create a Status variable
 
   Serial.begin(115200);
   while (!Serial); // Wait for serial port to connect
@@ -79,9 +76,9 @@ void setup()
   xTaskCreatePinnedToCore(
     &core_0_setup, /* Function to implement the task */
     "setup",       /* Name of the task */
-    500,         /* Stack size in words */
+    700,         /* Stack size in words */
     NULL,          /* Task input parameter */
-    3,             /* Priority of the task */
+    1,             /* Priority of the task */
     &Handler0,     /* Task handle. */
     0              /* Core where the task should run */
   );
@@ -101,4 +98,9 @@ void loop()
   //     }
   //   std::fill(msgString[i], msgString[i] + 128, 0);
   // }
+  LogAppendValues();
+  Serial.println("appended");
+  saveDataLog();
+  Serial.println("saved");
+  delay(20);
 }

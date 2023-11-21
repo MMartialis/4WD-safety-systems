@@ -15,7 +15,7 @@
 String dataString = ""; // holds the data to be written to the SD card
 String aiString = "";
 // std::string myDataString = "";
-char dataLogFileName[12] = {'d', 'a', 't', 'a', '0', '0', '0', '0', '.', 'c', 's', 'v'};
+char dataLogFileName[13] = {'/','d', 'a', 't', 'a', '0', '0', '0', '0', '.', 'c', 's', 'v'};
 
 // array
 // float escData[12]; // duty, currentM, erpm
@@ -42,10 +42,10 @@ char *findDataLogFileName()
 {
     for (int i = 0; i < 10000; i++)
     {
-        dataLogFileName[7] = '0' + i % 10;
-        dataLogFileName[6] = '0' + (i % 100 - i % 10) / 10;
-        dataLogFileName[5] = '0' + (i % 1000 - i % 100) / 100;
-        dataLogFileName[4] = '0' + (i % 10000 - i % 1000) / 1000;
+        dataLogFileName[8] = '0' + i % 10;
+        dataLogFileName[7] = '0' + (i % 100 - i % 10) / 10;
+        dataLogFileName[6] = '0' + (i % 1000 - i % 100) / 100;
+        dataLogFileName[5] = '0' + (i % 10000 - i % 1000) / 1000;
 
         if (!SD.exists(dataLogFileName))
         {
@@ -69,7 +69,7 @@ void saveDataLog()
             sensorDataLog.close(); // close the file
         }
     }
-    // else{
+    // else{4
     //     Serial.println("Error writing to file !");
     // }
 }

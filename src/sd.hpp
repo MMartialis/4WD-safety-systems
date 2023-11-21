@@ -7,7 +7,7 @@
 
 #define LOG_LENGTH 32
 
-extern char dataLogFileName[12];
+extern char dataLogFileName[13];
 extern float sdLoggingFloat[LOG_LENGTH]; // duty, currentM, erpm, tFET, tMot, tacho, Vbatt, Ibatt
 extern String dataString;
 extern String aiString;
