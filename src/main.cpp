@@ -9,9 +9,16 @@
 #include <cstdint>
 #endif
 
+// #include <string>
+
+#include <SPI.h>
+#include <BluetoothSerial.h>
+#include <SD.h>
+
 #include "vesc.hpp"
 #include "pwm.hpp"
 #include "can_comm.hpp"
+#include "sd.hpp"
 #include "./mcp_can.h"
 
 #define FL_ID 77
@@ -28,6 +35,7 @@
 #define BR_MAX_BRAKE_CURRENT 90
 
 #define PWM_PIN GPIO_NUM_2
+#define SD_CS_PIN 17
 
 extern char msgBuffer[RX_MSG_BUFFER_LEN][11];
 extern double lastPwmRead;
@@ -46,7 +54,6 @@ float currentBR = 0;
 
 void setup()
 {
-  // Create a Status variable
 
   Serial.begin(115200);
   while (!Serial)
@@ -64,14 +71,46 @@ void setup()
   SerialBt.begin("ESP32test"); // Bluetooth device name
   CAN0.setMode(MCP_NORMAL);    // Change to normal mode to allow messages to be transmitted
 
+
+
+  // Initialize SD card
+  pinMode(SD_CS_PIN, OUTPUT);
+  Serial.print("Initializing SD card...");
+  // see if the card is present and can be initialized:
+  if (!SD.begin(SD_CS_PIN)){
+      Serial.println("Card failed, or not present");
+      while (1);      
+  }
+  Serial.println("card initialized");
+  // resetting undefined value floats to 0.00 for SD logging
+  FillLogWithZeros();
+
+  SD.open(findDataLogFileName(), FILE_WRITE).close();
+
+
+
+  // Initialize SD card
+  pinMode(SD_CS_PIN, OUTPUT);
+  Serial.print("Initializing SD card...");
+  // see if the card is present and can be initialized:
+  if (!SD.begin(SD_CS_PIN)){
+      Serial.println("Card failed, or not present");
+      while (1);      
+  }
+  Serial.println("card initialized");
+  // resetting undefined value floats to 0.00 for SD logging
+  FillLogWithZeros();
+
+  SD.open(findDataLogFileName(), FILE_WRITE).close();
+
   xTaskCreatePinnedToCore(
-      &core_0_setup, /* Function to implement the task */
-      "setup",       /* Name of the task */
-      1000,          /* Stack size in words */
-      NULL,          /* Task input parameter */
-      3,             /* Priority of the task */
-      &Handler0,     /* Task handle. */
-      0              /* Core where the task should run */
+    &core_0_setup, /* Function to implement the task */
+    "setup",       /* Name of the task */
+    700,         /* Stack size in words */
+    NULL,          /* Task input parameter */
+    1,             /* Priority of the task */
+    &Handler0,     /* Task handle. */
+    0              /* Core where the task should run */
   );
 }
 
@@ -109,4 +148,9 @@ void loop()
   comm_can_set_current(BL_ID, currentBL);
   comm_can_set_current(BR_ID, currentBR);
   delay(10);
+  LogAppendValues();
+  Serial.println("appended");
+  saveDataLog();
+  Serial.println("saved");
+  delay(20);
 }
