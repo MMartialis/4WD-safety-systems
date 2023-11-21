@@ -18,6 +18,11 @@
 #include "vesc.hpp"
 #include "pwm.hpp"
 #include "can_comm.hpp"
+#include "bt.hpp"
+
+#include <cstring>
+#define PWM_PIN GPIO_NUM_2
+=======
 #include "sd.hpp"
 #include "./mcp_can.h"
 
@@ -42,8 +47,6 @@ extern double lastPwmRead;
 extern MCP_CAN CAN0;
 
 TaskHandle_t Handler0;
-
-uint8_t msgCount = 0;
 
 BluetoothSerial SerialBt;
 
