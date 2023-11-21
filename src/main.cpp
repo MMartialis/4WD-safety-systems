@@ -25,7 +25,7 @@
 #include "sd.hpp"
 
 #define PWM_PIN GPIO_NUM_2
-const int SDCSpin = 5;
+#define SD_CS_PIN 17
 
 extern char msgBuffer[RX_MSG_BUFFER_LEN][11];
 extern double lastPwmRead;
@@ -61,17 +61,18 @@ void setup()
 
 
   // Initialize SD card
-  pinMode(SDCSpin, OUTPUT);
+  pinMode(SD_CS_PIN, OUTPUT);
   Serial.print("Initializing SD card...");
   // see if the card is present and can be initialized:
-  if (!SD.begin(SDCSpin)){
+  if (!SD.begin(SD_CS_PIN)){
       Serial.println("Card failed, or not present");
-      return;
+      while (1);      
   }
   Serial.println("card initialized");
   // resetting undefined value floats to 0.00 for SD logging
   FillLogWithZeros();
 
+  SD.open(findDataLogFileName(), FILE_WRITE).close();
 
   xTaskCreatePinnedToCore(
     &core_0_setup, /* Function to implement the task */

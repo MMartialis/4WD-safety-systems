@@ -62,7 +62,7 @@ void saveDataLog()
     if (SD.exists(dataLogFileName))
     { // check the card is still there
         // now append new data file
-        sensorDataLog = SD.open(dataLogFileName, FILE_WRITE);
+        sensorDataLog = SD.open(dataLogFileName, FILE_APPEND);
         if (sensorDataLog)
         {
             sensorDataLog.println(dataString);
