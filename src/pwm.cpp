@@ -16,7 +16,6 @@ double lastPwmRead = 0;
 void pwm_interrupt()
 {
   unsigned long time = micros();
-  lastPwmRead++;
   if ((time - last_time) < 3000)
   {
     int number = time - last_time - pwm_micro_median;

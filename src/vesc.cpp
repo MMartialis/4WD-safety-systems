@@ -1,15 +1,18 @@
 // vesc.cpp
 
+#ifdef AVR // or whatever -- check the compiler docs, I don't know the standard way to check this offhand
 #include <stdint.h>
+#else
+#include <cstdint>
+#endif
+#include <Arduino.h>
 #include <SPI.h>
 #include <algorithm>
+
 #include "mcp_can.h"
 #include "vesc.hpp"
 
-
-
 extern MCP_CAN CAN0;
-
 extern TaskHandle_t Handler0;
 extern uint8_t msgCount;
 
@@ -23,7 +26,7 @@ void core_0_setup(void *params)
 {
     pinMode(CAN0_INT, INPUT);
     attachInterrupt(digitalPinToInterrupt(CAN0_INT), put_message_in_buffer, FALLING);
-    Serial.println("Interrupt attached");
+    // Serial.println("Interrupt attached");
     vTaskDelete(Handler0);
 }
 

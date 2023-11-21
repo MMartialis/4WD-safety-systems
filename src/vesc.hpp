@@ -1,10 +1,7 @@
 //vesc.hpp
 
-#include "mcp_can.h"
-
 #define CAN0_INT 21
 #define RX_MSG_BUFFER_LEN 8
-
 #define MOTOR1 0x35
 #define MOTOR2 0x4D
 #define MOTOR3 0x28

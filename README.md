@@ -19,6 +19,18 @@ It is planned to add the following safety features to the setup:
   - Torque vectoring
   - Speed wobble prevention system
 
+## Serial commands
+
+"ABS"					          -- return if ABS function is enalbled or not
+"ABS 0"				        	-- turn off ABS
+"ABS 1"				        	-- turn on abs
+"ESTOP"                 -- enable estop, set estop to 1
+"RESET"                 -- reset estop, set estop to 0
+"STATUS"                -- return status
+"STATUS 0"              -- set status
+"RESTART"               -- restart
+
+
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
