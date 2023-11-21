@@ -14,6 +14,8 @@ extern int8_t duty_lr;
 extern int8_t duty_rr;
 extern TaskHandle_t Handler1;
 
+BluetoothSerial SerialBt;
+
 void bt_setup(void* params){
     SerialBt.begin("esp_32_awd");
     SerialBt.println("Bluetooth setup completed");
@@ -107,10 +109,10 @@ void duty_set(uint8_t duty){
 }
 
 
-void esc_status(){
-    SerialBt.printf();
+// void esc_status(){
+//     SerialBt.printf();
  
-} // basic status message
+// } // basic status message
 
 void esc_status(bool extended); // extended status message (true or false)
 

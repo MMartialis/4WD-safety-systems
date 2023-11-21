@@ -1,6 +1,6 @@
 #include <BluetoothSerial.h>
 
-BluetoothSerial SerialBt;
+extern BluetoothSerial SerialBt;
 
 void bt_setup(void* params);
 
