@@ -21,29 +21,29 @@
 #include "status.hpp"
 #include "pwm.hpp"
 #include "can_comm.hpp"
+#include "bt.hpp"
 
-extern char msgBuffer[RX_MSG_BUFFER_LEN][11];
+#include <cstring>
+#define PWM_PIN GPIO_NUM_2
 
-TaskHandle_t Handler0;
 
-uint8_t msgCount = 0;
 
+// uint8_t msgCount = 0;
+// uint8_t len = 0;
+// uint32_t intCd = 1;
+uint8_t ize = 0;
 bool print_realtime_data = 1;
 long last_print_data;
 
-
-#define PWM_PIN GPIO_NUM_2
+TaskHandle_t Handler0;
+TaskHandle_t Handler1;
 
 using namespace VehicleStatus;
 
 extern double lastPwmRead;
-#include <BluetoothSerial.h>
+extern char msgBuffer[RX_MSG_BUFFER_LEN][12];
 
-TaskHandle_t fasz;
-uint8_t len = 0;
-uint32_t intCd = 1;
-uint8_t ize = 0;
-BluetoothSerial Serialbt;
+
 // start print job on core 0
 void start_print_job()
 {
@@ -56,19 +56,9 @@ void start_print_job()
     {
       sprintf(msgString[msgId] + strlen(msgString[msgId]), " 0x%.2X", rxBuf[i]);
     }
-    // Serial.println(msgString);
     ize++;
     counter--;
   }
-  // xTaskCreatePinnedToCore(
-  //   &print_raw_can_data,  /* Function to implement the task */
-  //   "print_raw_can_data", /* Name of the task */
-  //   10000,                 /* Stack size in words */
-  //   NULL,                 /* Task input parameter */
-  //   0,                    /* Priority of the task */
-  //   &fasz,                /* Task handle. */
-  //   0                     /* Core where the task should run */
-  // );
 }
 
 void setup()
@@ -103,22 +93,14 @@ void setup()
     &Handler0,     /* Task handle. */
     0              /* Core where the task should run */
   );
+
+    xTaskCreatePinnedToCore(
+    &bt_setup, /* Function to implement the task */
+    "bluetooth_setup",       /* Name of the task */
+    500,         /* Stack size in words */
+    NULL,          /* Task input parameter */
+    4,             /* Priority of the task */
+    &Handler1,     /* Task handle. */
+    0              /* Core where the task should run */
+  );
 }
-
-void loop()
-{
-  for (int8_t i = 0; i < RX_MSG_BUFFER_LEN; i++)
-  {
-    if (strlen(msgString[i]) > 0)
-    {
-      Serial.print(ize);
-      Serial.println(msgString[i]);
-      Serialbt.write(ize);
-      Serialbt.write((uint8_t *)msgString[i], strlen(msgString[i]));
-      Serial.println("Free memory: " + String(esp_get_free_heap_size()) + " bytes");
-      }
-    std::fill(msgString[i], msgString[i] + 128, 0);
-  }
-}
-
-
