@@ -9,48 +9,12 @@
 #include <SPI.h>
 #include <algorithm>
 
-#include "mcp_can.h"
 #include "vesc.hpp"
+#include "mcp_can.h"
+#include "can_comm.hpp"
 
-extern MCP_CAN CAN0;
-extern TaskHandle_t Handler0;
 extern uint8_t msgCount;
-
-long unsigned int rxId;
-uint8_t len = 0;
-uint8_t rxBuf[8];
-
-char msgBuffer[RX_MSG_BUFFER_LEN][12]; 
-
-void core_0_setup(void *params)
-{
-    pinMode(CAN0_INT, INPUT);
-    attachInterrupt(digitalPinToInterrupt(CAN0_INT), put_message_in_buffer, FALLING);
-    // Serial.println("Interrupt attached");
-    vTaskDelete(Handler0);
-}
-
-void put_message_in_buffer()
-{
-  for (; CAN0.readMsgBuf(&rxId, &len, rxBuf) != CAN_NOMSG;)
-  {
-    const char message[12] = {
-        (byte) (rxId >> 8), // 2 db zarojel
-        (byte) rxId,
-        (byte) len,
-        rxBuf[0],
-        rxBuf[1],
-        rxBuf[2],
-        rxBuf[3],
-        rxBuf[4],
-        rxBuf[5],
-        rxBuf[6],
-        rxBuf[7],
-        0x00
-    };
-    std::copy(message, message + 12, msgBuffer[msgCount%RX_MSG_BUFFER_LEN]);
-  }
-}
+extern char msgBuffer[RX_MSG_BUFFER_LEN][12];
 
 // can IDs
 // első         53,     77

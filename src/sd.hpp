@@ -6,6 +6,7 @@
 
 
 #define LOG_LENGTH 32
+#define SD_CS_PIN 17
 
 extern char dataLogFileName[13];
 extern float sdLoggingFloat[LOG_LENGTH]; // duty, currentM, erpm, tFET, tMot, tacho, Vbatt, Ibatt

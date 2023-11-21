@@ -1,7 +1,46 @@
 #include "can_comm.hpp"
 
-MCP_CAN CAN0(5);
+extern TaskHandle_t Handler0;
+uint8_t msgCount = 0;
 
+MCP_CAN CAN0(CAN0_CS);
+
+long unsigned int rxId;
+uint8_t len = 0;
+uint8_t rxBuf[8];
+
+char msgBuffer[RX_MSG_BUFFER_LEN][12];
+
+void core_0_setup(void *params)
+{
+    pinMode(CAN0_INT, INPUT);
+    attachInterrupt(digitalPinToInterrupt(CAN0_INT), put_message_in_buffer, FALLING);
+    // Serial.println("Interrupt attached");
+    vTaskDelete(Handler0);
+}
+
+void put_message_in_buffer()
+{
+  for (; CAN0.readMsgBuf(&rxId, &len, rxBuf) != CAN_NOMSG;)
+  {
+    const char message[12] = {
+        (byte) (rxId >> 8),
+        (byte) rxId,
+        (byte) len,
+        rxBuf[0],
+        rxBuf[1],
+        rxBuf[2],
+        rxBuf[3],
+        rxBuf[4],
+        rxBuf[5],
+        rxBuf[6],
+        rxBuf[7],
+        0x00
+    };
+    std::copy(message, message + 12, msgBuffer[msgCount%RX_MSG_BUFFER_LEN]);
+    msgCount++;
+  }
+}
 
 // Implementation for sending extended ID CAN-frames
 void can_transmit_eid(uint32_t id, const uint8_t *data, uint8_t len, uint8_t rtr)

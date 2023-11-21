@@ -1,5 +1,10 @@
 #include "mcp_can.h"
 
+#define CAN0_INT 21
+#define CAN0_CS 5
+
+#define RX_MSG_BUFFER_LEN 8
+
 extern MCP_CAN CAN0;
 
 void can_transmit_eid(uint32_t id, const uint8_t *data, uint8_t len);
@@ -17,6 +22,11 @@ typedef enum
     CAN_PACKET_SET_CURRENT_HANDBRAKE_REL = 13,
     CAN_PACKET_MAKE_ENUM_32_BITS = 0xFFFFFFFF,
 } CAN_PACKET_ID;
+
+
+void core_0_setup(void* params);
+
+void put_message_in_buffer(void);
 
 void buffer_append_int16(uint8_t *buffer, int16_t number, int32_t *index);
 
