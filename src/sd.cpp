@@ -7,25 +7,22 @@
 #include <SD.h>
 #include <string>
 
-// CS    = 5;
+// CS    = 17;
 // MOSI  = 23;
 // MISO  = 19;
 // SCK   = 18;
 
 String dataString = ""; // holds the data to be written to the SD card
-String aiString = "";
-// std::string myDataString = "";
 char dataLogFileName[13] = {'/','d', 'a', 't', 'a', '0', '0', '0', '0', '.', 'c', 's', 'v'};
+uint32_t sdLoggingMessage[SD_LOG_ENTRY_SIZE]; // duty, currentM, erpm, tFET, tMot, tacho, Vbatt, Ibatt
 
-// array
-// float escData[12]; // duty, currentM, erpm
-float sdLoggingFloat[SD_LOG_ENTRY_SIZE]; // duty, currentM, erpm, tFET, tMot, tacho, Vbatt, Ibatt
+//extern uint8_t rxBuf[8];
 
 void FillLogWithZeros()
 {
     for (int i = 0; i < SD_LOG_ENTRY_SIZE; i++)
     {
-        sdLoggingFloat[i] = 0.00;
+        sdLoggingMessage[i] = 0.00;
     }
 }
 
@@ -33,9 +30,9 @@ void LogAppendValues()
 {
     for (int i = 0; i < SD_LOG_ENTRY_SIZE - 1; i++)
     {
-        dataString += String(sdLoggingFloat[i]) + ",";
+        dataString += String(sdLoggingMessage[i]) + ",";
     }
-    dataString += String(sdLoggingFloat[SD_LOG_ENTRY_SIZE - 1]);
+    dataString += String(sdLoggingMessage[SD_LOG_ENTRY_SIZE - 1]);
 }
 
 char *findDataLogFileName()
@@ -69,49 +66,7 @@ void saveDataLog()
             sensorDataLog.close(); // close the file
         }
     }
-    // else{4
+    // else{
     //     Serial.println("Error writing to file !");
     // }
 }
-
-File aiParameter;
-
-// void setup()
-// {
-//     pinMode(SDCSpin, OUTPUT);
-
-//     // Open serial communications
-//     Serial.begin(9600);
-//     Serial.print("Initializing SD card...");
-
-//     // see if the card is present and can be initialized:
-//     if (!SD.begin(SDCSpin)){
-//         Serial.println("Card failed, or not present");
-//         return;
-//     }
-
-//     Serial.println("card initialized");
-
-// }
-
-// void loop(){
-//     // build the data string
-//     dataString = String(sensorReading1) + "," + String(sensorReading2) + "," + String(sensorReading3); // convert to CSV
-//     saveData(); // save to SD card
-//     delay(60000); // delay before next write to SD Card, adjust as required
-// }
-
-// void readData(){
-//     // read from the SD card and display on the serial monitor
-//     sensorDataLog = SD.open(dataLogFileName);
-//     if (sensorDataLog){
-//         Serial.println("Reading from file:");
-//         while (sensorDataLog.available()){
-//             Serial.write(sensorDataLog.read());
-//         }
-//         sensorDataLog.close(); // close the file
-//     }
-//     else{
-//         Serial.println("Error opening file !");
-//     }
-// }
