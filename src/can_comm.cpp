@@ -1,6 +1,7 @@
 #include "can_comm.hpp"
 
 extern TaskHandle_t Handler0;
+extern bool SD_ACTIVE;
 uint8_t msgCount = 0;
 
 MCP_CAN CAN0(CAN0_CS);
@@ -13,15 +14,18 @@ char msgBuffer[RX_MSG_BUFFER_LEN][12];
 
 void core_0_setup(void *params)
 {
+
     pinMode(CAN0_INT, INPUT);
     attachInterrupt(digitalPinToInterrupt(CAN0_INT), put_message_in_buffer, FALLING);
-    // Serial.println("Interrupt attached");
+    if (VERBOSE) Serial.println("CAN0 interrupt attached");
     vTaskDelete(Handler0);
 }
 
 void put_message_in_buffer()
 {
-    digitalWrite(CAN0_CS, LOW);
+    extern bool SD_ACTIVE;
+    if (SD_ACTIVE != 1) digitalWrite(CAN0_CS, LOW);
+    else return;
   for (; CAN0.readMsgBuf(&rxId, &len, rxBuf) != CAN_NOMSG;)
   {
     const char message[12] = {
@@ -49,7 +53,9 @@ void can_transmit_eid(uint32_t id, const uint8_t *data, uint8_t len, uint8_t rtr
 {
     digitalWrite(CAN0_CS, LOW);
     CAN0.sendMsgBuf((unsigned long)id, (byte)1, (byte)rtr, (byte)len, (byte * ) data);
+    if (VERBOSE) Serial.println("CAN message sent");
     digitalWrite(CAN0_CS, HIGH);
+    if (VERBOSE) Serial.println("CAN0_CS HIGH");
 }
 
 void buffer_append_int16(uint8_t *buffer, int16_t number, int32_t *index)

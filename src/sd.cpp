@@ -12,6 +12,7 @@
 // MISO  = 19;
 // SCK   = 18;
 
+bool SD_ACTIVE = 1;
 String dataString = ""; // holds the data to be written to the SD card
 String aiString = "";
 // std::string myDataString = "";
@@ -59,7 +60,10 @@ File sensorDataLog;
 
 void saveDataLog()
 {
+    extern bool SD_ACTIVE;
+    SD_ACTIVE = 1;
     digitalWrite(SD_CS_PIN, LOW);
+    
     if (SD.exists(dataLogFileName))
     { // check the card is still there
         // now append new data file
@@ -71,6 +75,7 @@ void saveDataLog()
         }
     }
     digitalWrite(SD_CS_PIN, HIGH);
+    SD_ACTIVE = 0;
     // else{4
     //     Serial.println("Error writing to file !");
     // }

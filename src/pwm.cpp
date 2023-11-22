@@ -1,8 +1,8 @@
 // pwm.cpp
 #include "pwm.hpp"
 
-float pwm_multiplier_pos = pow((PWM_MAX_INTERVAL_MICROS - PWM_MEDIAN_INTERVAL_MICROS), -1);
-float pwm_multiplier_neg = pow((PWM_MEDIAN_INTERVAL_MICROS - PWM_MIN_INTERVAL_MICROS), -1);
+const float pwm_multiplier_pos = pow((PWM_MAX_INTERVAL_MICROS - PWM_MEDIAN_INTERVAL_MICROS), -1);
+const float pwm_multiplier_neg = pow((PWM_MEDIAN_INTERVAL_MICROS - PWM_MIN_INTERVAL_MICROS), -1);
 
 
 unsigned long last_time = micros();
@@ -19,11 +19,11 @@ void pwm_interrupt()
     }
     else if (number > 0)
     {
-      lastPwmRead = float(number) * pwm_multiplier_pos;
+      lastPwmRead = double(number) * pwm_multiplier_pos;
     }
     else
     {
-      lastPwmRead = float(number) * pwm_multiplier_neg;
+      lastPwmRead = double(number) * pwm_multiplier_neg;
     }
   }
   last_time = time;

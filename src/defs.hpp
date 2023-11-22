@@ -1,3 +1,8 @@
+#ifndef DEFS_HPP
+#define DEFS_HPP
+
+#define VERBOSE 1
+
 #define FL_ID 77
 #define FL_MAX_CURRENT 60
 #define FL_MAX_BRAKE_CURRENT 60
@@ -21,4 +26,6 @@
 #define PWM_MEDIAN_INTERVAL_MICROS 1500
 
 #define SD_LOG_ENTRY_SIZE 32
-#define SD_CS_PIN 17
+#define SD_CS_PIN 1
+
+#endif
