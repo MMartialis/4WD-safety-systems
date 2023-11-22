@@ -59,6 +59,7 @@ File sensorDataLog;
 
 void saveDataLog()
 {
+    digitalWrite(SD_CS_PIN, LOW);
     if (SD.exists(dataLogFileName))
     { // check the card is still there
         // now append new data file
@@ -69,6 +70,7 @@ void saveDataLog()
             sensorDataLog.close(); // close the file
         }
     }
+    digitalWrite(SD_CS_PIN, HIGH);
     // else{4
     //     Serial.println("Error writing to file !");
     // }

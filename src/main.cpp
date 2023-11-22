@@ -42,20 +42,23 @@ void setup()
   Serial.begin(115200);
   while (!Serial); // Wait for serial port to connect
 
-  pinMode(PWM_PIN, INPUT);
+  pinMode(PWM_PIN, INPUT);  // pwm setup
   attachInterrupt(digitalPinToInterrupt(PWM_PIN), pwm_interrupt, CHANGE);
 
-  // Initialize MCP2515 running at 16MHz with a baudrate of 500kb/s and the masks and filters disabled.
+  // Init MCP2515
+  digitalWrite(CAN0_CS, LOW);
   if (CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK)
     Serial.println("MCP2515 Initialized Successfully!");
   else
     Serial.println("Error Initializing MCP2515...");
 
   CAN0.setMode(MCP_NORMAL);    // Change to normal mode to allow messages to be transmitted
+  digitalWrite(CAN0_CS, HIGH);
 
 
 
   // Initialize SD card
+  digitalWrite(SD_CS_PIN, LOW);
   pinMode(SD_CS_PIN, OUTPUT);
   Serial.print("Initializing SD card...");
   // see if the card is present and can be initialized:
@@ -67,6 +70,7 @@ void setup()
   // resetting undefined value floats to 0.00 for SD logging
   SD.open(findDataLogFileName(), FILE_WRITE).close();
   FillLogWithZeros();
+  digitalWrite(SD_CS_PIN, HIGH);
 
   xTaskCreatePinnedToCore(
     &core_0_setup, /* Function to implement the task */

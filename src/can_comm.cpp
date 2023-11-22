@@ -21,6 +21,7 @@ void core_0_setup(void *params)
 
 void put_message_in_buffer()
 {
+    digitalWrite(CAN0_CS, LOW);
   for (; CAN0.readMsgBuf(&rxId, &len, rxBuf) != CAN_NOMSG;)
   {
     const char message[12] = {
@@ -40,12 +41,15 @@ void put_message_in_buffer()
     std::copy(message, message + 12, msgBuffer[msgCount%RX_MSG_BUFFER_LEN]);
     msgCount++;
   }
+    digitalWrite(CAN0_CS, HIGH);
 }
 
 // Implementation for sending extended ID CAN-frames
 void can_transmit_eid(uint32_t id, const uint8_t *data, uint8_t len, uint8_t rtr)
 {
+    digitalWrite(CAN0_CS, LOW);
     CAN0.sendMsgBuf((unsigned long)id, (byte)1, (byte)rtr, (byte)len, (byte * ) data);
+    digitalWrite(CAN0_CS, HIGH);
 }
 
 void buffer_append_int16(uint8_t *buffer, int16_t number, int32_t *index)
