@@ -37,8 +37,10 @@ float currentRR = 0;
 
 void setup()
 {
-  // pinMode(SD_CS_PIN, OUTPUT);
-  // pinMode(CAN0_CS, OUTPUT);
+  pinMode(SD_CS_PIN, OUTPUT);
+  digitalWrite(SD_CS_PIN, HIGH);
+  pinMode(CAN0_CS, OUTPUT);
+  digitalWrite(CAN0_CS, HIGH);
   Serial.begin(115200);
   while (!Serial)
     ; // Wait for serial port to connect
@@ -49,51 +51,48 @@ void setup()
     Serial.println("PWM interrupt attached");
 
   // Initialize SD card
+  // if (VERBOSE)
+  //   Serial.print("Initializing SD card...");
   // digitalWrite(SD_CS_PIN, LOW);
-
-  // if (VERBOSE) Serial.println("SD_CS_PIN LOW");
-  if (VERBOSE)
-    Serial.print("Initializing SD card...");
-  // see if the card is present and can be initialized:
-  if (!SD.begin(SD_CS_PIN))
-  {
-    Serial.println("Card failed, or not present");
-    // while (1)
-    //   ; // don't do anything more
-  }
-  if (VERBOSE)
-    Serial.println("card initialized");
-  // resetting undefined value floats to 0.00 for SD logging
-  SD.open(findDataLogFileName(), FILE_WRITE).close();
-  if (VERBOSE)
-    Serial.println("log file created");
+  // // see if the card is present and can be initialized:
+  // if (!SD.begin(SD_CS_PIN))
+  // {
+  //   Serial.println("Card failed, or not present");
+  //   while (1)
+  //     ; // don't do anything more
+  // }
+  // if (VERBOSE)
+  //   Serial.println("card initialized");
+  // // resetting undefined value floats to 0.00 for SD logging
+  // SD.open(findDataLogFileName(), FILE_WRITE).close();
   // digitalWrite(SD_CS_PIN, HIGH);
-  if (VERBOSE)
-    Serial.println("CS pin high");
-  FillLogWithZeros();
+  // if (VERBOSE)
+  //   Serial.println("log file created");
+  // FillLogWithZeros();
 
   // Init MCP2515
-  // digitalWrite(CAN0_CS, LOW);
-  delay(10);
+  if (VERBOSE)
+    Serial.print("MCP2515 Initializing...");
+  digitalWrite(CAN0_CS, LOW);
   if (CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK)
   {
     if (VERBOSE)
       Serial.println("MCP2515 Initialized Successfully!");
     CAN0.setMode(MCP_NORMAL);
+    if (VERBOSE)
+      Serial.println("MCP2515 Normal Mode Activated!");
   }
   else
   {
     if (VERBOSE)
       Serial.println("Error Initializing MCP2515...");
   }
-  // digitalWrite(CAN0_CS, HIGH);
-  if (VERBOSE)
-    Serial.println("MCP2515 Normal Mode Activated!");
+  digitalWrite(CAN0_CS, HIGH);
 
   xTaskCreatePinnedToCore(
       &core_0_setup, /* Function to implement the task */
       "setup",       /* Name of the task */
-      700,           /* Stack size in words */
+      800,           /* Stack size in words */
       NULL,          /* Task input parameter */
       1,             /* Priority of the task */
       &Handler0,     /* Task handle. */

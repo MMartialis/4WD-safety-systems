@@ -26,6 +26,6 @@
 #define PWM_MEDIAN_INTERVAL_MICROS 1500
 
 #define SD_LOG_ENTRY_SIZE 32
-#define SD_CS_PIN 1
+#define SD_CS_PIN 17
 
 #endif
