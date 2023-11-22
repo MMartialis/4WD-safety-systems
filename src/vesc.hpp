@@ -1,11 +1,7 @@
 //vesc.hpp
 #include "mcp_can.h"
 
-
-#define MOTOR1 0x35
-#define MOTOR2 0x4D
-#define MOTOR3 0x28
-#define MOTOR4 0x0D
+#include "defs.hpp"
 
 extern MCP_CAN CAN0;
 

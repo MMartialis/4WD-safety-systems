@@ -19,11 +19,11 @@ char dataLogFileName[13] = {'/','d', 'a', 't', 'a', '0', '0', '0', '0', '.', 'c'
 
 // array
 // float escData[12]; // duty, currentM, erpm
-float sdLoggingFloat[LOG_LENGTH]; // duty, currentM, erpm, tFET, tMot, tacho, Vbatt, Ibatt
+float sdLoggingFloat[SD_LOG_ENTRY_SIZE]; // duty, currentM, erpm, tFET, tMot, tacho, Vbatt, Ibatt
 
 void FillLogWithZeros()
 {
-    for (int i = 0; i < LOG_LENGTH; i++)
+    for (int i = 0; i < SD_LOG_ENTRY_SIZE; i++)
     {
         sdLoggingFloat[i] = 0.00;
     }
@@ -31,11 +31,11 @@ void FillLogWithZeros()
 
 void LogAppendValues()
 {
-    for (int i = 0; i < LOG_LENGTH - 1; i++)
+    for (int i = 0; i < SD_LOG_ENTRY_SIZE - 1; i++)
     {
         dataString += String(sdLoggingFloat[i]) + ",";
     }
-    dataString += String(sdLoggingFloat[LOG_LENGTH - 1]);
+    dataString += String(sdLoggingFloat[SD_LOG_ENTRY_SIZE - 1]);
 }
 
 char *findDataLogFileName()

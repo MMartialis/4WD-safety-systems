@@ -4,12 +4,10 @@
 #include <algorithm>
 #include <SD.h>
 
-
-#define LOG_LENGTH 32
-#define SD_CS_PIN 17
+#include "defs.hpp"
 
 extern char dataLogFileName[13];
-extern float sdLoggingFloat[LOG_LENGTH]; // duty, currentM, erpm, tFET, tMot, tacho, Vbatt, Ibatt
+extern float sdLoggingFloat[SD_LOG_ENTRY_SIZE]; // duty, currentM, erpm, tFET, tMot, tacho, Vbatt, Ibatt
 extern String dataString;
 extern String aiString;
 //extern float escData[12]; // duty, currentM, erpm

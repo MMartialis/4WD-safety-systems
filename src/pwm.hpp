@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 
-#define PWM_PIN 2
+#include "defs.hpp"
 
 extern double lastPwmRead;
 

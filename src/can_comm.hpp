@@ -1,9 +1,6 @@
 #include "mcp_can.h"
 
-#define CAN0_INT 21
-#define CAN0_CS 5
-
-#define RX_MSG_BUFFER_LEN 8
+#include "defs.hpp"
 
 extern MCP_CAN CAN0;
 

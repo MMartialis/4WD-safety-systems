@@ -1,14 +1,8 @@
 // pwm.cpp
-
-#include <Arduino.h>
 #include "pwm.hpp"
 
-#define pwm_micro_min 1108
-#define pwm_micro_max 1880
-#define pwm_micro_median 1500
-
-float pwm_multiplier_pos = pow((pwm_micro_max - pwm_micro_median), -1);
-float pwm_multiplier_neg = pow((pwm_micro_median - pwm_micro_min), -1);
+float pwm_multiplier_pos = pow((PWM_MAX_INTERVAL_MICROS - PWM_MEDIAN_INTERVAL_MICROS), -1);
+float pwm_multiplier_neg = pow((PWM_MEDIAN_INTERVAL_MICROS - PWM_MIN_INTERVAL_MICROS), -1);
 
 
 unsigned long last_time = micros();
@@ -18,7 +12,7 @@ void pwm_interrupt()
   unsigned long time = micros();
   if ((time - last_time) < 3000)
   {
-    int number = time - last_time - pwm_micro_median;
+    int number = time - last_time - PWM_MEDIAN_INTERVAL_MICROS;
     if (abs(number) < 0.002)
     {
       number = 0;
