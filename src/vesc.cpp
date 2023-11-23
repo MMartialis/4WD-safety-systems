@@ -29,7 +29,7 @@ esc vescFL, vescFR, vescRL, vescRR;
 void update_esc_status_control()
 {
   byte esc_stat = 0; // byte to store whether the escs are updated or not
-  uint8_t msgId = msgCount % RX_MSG_BUFFER_LEN;
+  uint8_t msgId = msgCount % RX_MSG_BUFFER_LEN - 1;
   uint8_t count = 0;
   while (esc_stat != 0x0f && count < RX_MSG_BUFFER_LEN)
   {
@@ -42,7 +42,12 @@ void update_esc_status_control()
         Serial.print(msgBuffer[msgId][i], HEX);
         Serial.print(" ");
       }
-      Serial.println();
+      // print esc_stat bit by bit
+      for (int i = 3; i >= 0; i--)
+      {
+        Serial.print((esc_stat >> i) & 0x01, BIN);
+      }
+      Serial.print(" ");
     }
     count++;
     if (msgBuffer[msgId][0] != 0x09)

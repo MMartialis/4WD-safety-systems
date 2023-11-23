@@ -16,15 +16,22 @@ void pwm_interrupt()
     if (abs(number) > PWM_DEADZONE)
     {
       lastPwmRead = number;
+    } else {
+      lastPwmRead = 0;
     }
-    last_time = time;
+  } else {
+    lastPwmRead = 0;
   }
+  last_time = time;
 }
-
 
 float get_pwm()
 {
-  if (lastPwmRead > 0)
+  if (!en_pwm)
+  {
+    return 0;
+  }
+  if (lastPwmRead < 0)
   {
     return float(lastPwmRead) * pwm_multiplier_pos;
   }

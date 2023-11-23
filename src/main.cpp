@@ -100,7 +100,6 @@ void setup() {
 
   //*******************************************************************************************
   // Init MCP2515
-    void mcp2515_reset(void); // Soft Reset MCP2515
   if (VERBOSE)
     Serial.print("MCP2515 Initializing...");
   if (CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK) {
@@ -138,6 +137,7 @@ void loop() {
   }
 
   lastPWM = get_pwm();
+  update_esc_status_control();
   if (lastPWM >= 0 || true) {
     currentFL = lastPWM * FL_MAX_CURRENT;
     currentFR = lastPWM * FR_MAX_CURRENT;
@@ -154,8 +154,7 @@ void loop() {
   if (VERBOSE)
     Serial.println("current set");
   
-  update_esc_status_control();
-  bt_log("FL erpm: ", vescFL.erpm, "FL current: ", vescFL.current, "\n");
+  bt_log("PWM: ", lastPWM, " FL erpm: ", vescFL.erpm, " FL current: ", vescFL.current, "\n");
   // LogAppendValues();
   // if (VERBOSE)
   //   Serial.println("values logged");
