@@ -1,10 +1,10 @@
 // bt.hpp
 
-// #include <BluetoothSerial.h>
+#include <BluetoothSerial.h>
+#include "defs.hpp"
 
-// extern BluetoothSerial SerialBt;
 
-// void bt_setup(void* params);
+void bt_setup();
 
 // void machineLearning_status(); // print Machine Learning status on serial and bluetooth
 

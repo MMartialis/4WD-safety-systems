@@ -4,7 +4,7 @@
 // big includes, that are part of the framework
 
 #include <Arduino.h>
-// #include <BluetoothSerial.h>
+#include <BluetoothSerial.h>
 // #include <SD.h>
 #include <SPI.h>
 #include <cstring>
@@ -23,11 +23,11 @@
 #include "defs.hpp"
 
 #include "./mcp_can.h"
-// #include "bt.hpp"
 #include "can_comm.hpp"
-#include "pwm.hpp"
-// #include "sd.hpp"
 #include "vesc.hpp"
+#include "pwm.hpp"
+#include "bt.hpp"
+// #include "sd.hpp"
 
 //---------------------------------------------------------------------------------------------
 // global variables
@@ -35,6 +35,7 @@
 extern char msgBuffer[RX_MSG_BUFFER_LEN][12];
 extern double lastPwmRead;
 extern MCP_CAN CAN0;
+extern BluetoothSerial SerialBt;
 
 TaskHandle_t Handler0;
 
@@ -66,6 +67,10 @@ void setup() {
   // Initialize SD card
   if (VERBOSE)
     Serial.print("Initializing SD card...");
+
+  //*******************************************************************************************
+  // Bluetooth setup
+  bt_setup();
 
   //*******************************************************************************************
   // SD setup
@@ -136,6 +141,8 @@ void loop() {
   delay(2);
   if (VERBOSE)
     Serial.println("current set");
+  
+  SerialBt.println(lastPwmRead);
   // LogAppendValues();
   // if (VERBOSE)
   //   Serial.println("values logged");

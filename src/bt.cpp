@@ -1,31 +1,17 @@
 // bt.cpp
 
-// #include "bt.hpp"
-// #include "main.cpp"
-// bool pwm_state;
-// int8_t em_pwm;
-// bool ml_status;
-// char bt_cache;
-// BluetoothSerial SerialBt;
+#include "bt.hpp"
 
-// extern int8_t current_lf;
-// extern int8_t current_rf;
-// extern int8_t current_lr;
-// extern int8_t current_rr;
-// extern int8_t duty_lf;
-// extern int8_t duty_rf;
-// extern int8_t duty_lr;
-// extern int8_t duty_rr;
+BluetoothSerial SerialBt;
+
 // extern TaskHandle_t Handler1;
 
-// BluetoothSerial SerialBt;
-
-// void bt_setup(void* params){
-//     SerialBt.begin("esp_32_awd");
-//     SerialBt.println("Bluetooth setup completed");
-//     Serial.println("Bluetooth setup completed");
-//     vTaskDelete(Handler1);
-// }
+void bt_setup(){
+    SerialBt.begin("esp_32_awd");
+    SerialBt.println("Bluetooth setup completed");
+    if (VERBOSE) Serial.println("Bluetooth setup completed");
+    // vTaskDelete(Handler1);
+}
 
 // void machinelearning_status() {
 //     if (ml_status) {
