@@ -53,11 +53,8 @@ void put_message_in_buffer()
 // Implementation for sending extended ID CAN-frames
 void can_transmit_eid(uint32_t id, const uint8_t *data, uint8_t len, uint8_t rtr)
 {
-    digitalWrite(CAN0_CS, LOW);
     CAN0.sendMsgBuf((unsigned long)id, (byte)1, (byte)rtr, (byte)len, (byte * ) data);
     if (VERBOSE) Serial.println("CAN message sent");
-    digitalWrite(CAN0_CS, HIGH);
-    if (VERBOSE) Serial.println("CAN0_CS HIGH");
 }
 
 void buffer_append_int16(uint8_t *buffer, int16_t number, int32_t *index)

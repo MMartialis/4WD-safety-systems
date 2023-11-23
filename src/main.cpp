@@ -88,6 +88,7 @@ void setup() {
 
   //*******************************************************************************************
   // Init MCP2515
+    void mcp2515_reset(void); // Soft Reset MCP2515
   if (VERBOSE)
     Serial.print("MCP2515 Initializing...");
   if (CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK) {

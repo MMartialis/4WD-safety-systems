@@ -37,7 +37,8 @@ void update_esc_status_control()
 {                    // updates the esc status variables for control funcs.
   byte esc_stat = 0; // byte to store whether the escs are updated or not
   uint8_t msgId = msgCount % RX_MSG_BUFFER_LEN;
-  while (esc_stat != 0x0f)
+  uint8_t count = 0;
+  while (esc_stat != 0x0f && count <= RX_MSG_BUFFER_LEN)
   {
     if (msgBuffer[msgId][0] != 0x09)
     {
@@ -46,6 +47,7 @@ void update_esc_status_control()
       {
         msgId = RX_MSG_BUFFER_LEN - 1;
       }
+      count++;
       continue;
     }
     if (msgBuffer[msgId][12] == 1)
@@ -72,6 +74,7 @@ void update_esc_status_control()
       {
         msgId = RX_MSG_BUFFER_LEN - 1;
       }
+      count++;
       continue;
     }
 
@@ -109,6 +112,7 @@ void update_esc_status_control()
     {
       msgId = RX_MSG_BUFFER_LEN - 1;
     }
+    count++;
   }
 }
 
@@ -117,7 +121,8 @@ void update_esc_status_log()
 {
   byte esc_stat = 0; // byte to store whether the escs are updated or not
   uint8_t msgId = msgCount % RX_MSG_BUFFER_LEN;
-  while (esc_stat != 0x0f)
+  uint8_t count = 0;
+  while (esc_stat != 0x0f && count <= RX_MSG_BUFFER_LEN)
   {
     if (msgBuffer[msgId][0] != 0x09)
     {
@@ -126,6 +131,7 @@ void update_esc_status_log()
       {
         msgId = RX_MSG_BUFFER_LEN - 1;
       }
+      count++;
       continue;
     }
 
@@ -153,6 +159,7 @@ void update_esc_status_log()
       {
         msgId = RX_MSG_BUFFER_LEN - 1;
       }
+      count++;
       continue;
     }
 
@@ -182,5 +189,6 @@ void update_esc_status_log()
       (*myMotor).pid_pos = float(((msgBuffer[msgId][8] << 8) | (msgBuffer[msgId][9])) / 50.0);
       break;
     }
+    count++;
   }
 }
