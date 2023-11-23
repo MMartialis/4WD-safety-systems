@@ -5,6 +5,7 @@
 
 #define VERBOSE 1
 
+#define PWM_DEADZONE 10 // the deadzone for the pwm signal in microseconds
 #define FL_ID 77
 #define FL_MAX_CURRENT 60
 #define FL_MAX_BRAKE_CURRENT 60

@@ -5,7 +5,7 @@
 
 #include <Arduino.h>
 // #include <BluetoothSerial.h>
-#include <SD.h>
+// #include <SD.h>
 #include <SPI.h>
 #include <cstring>
 // #include <ESP32TimerInterrupt.h>
@@ -23,10 +23,10 @@
 #include "defs.hpp"
 
 #include "./mcp_can.h"
-#include "bt.hpp"
+// #include "bt.hpp"
 #include "can_comm.hpp"
 #include "pwm.hpp"
-#include "sd.hpp"
+// #include "sd.hpp"
 #include "vesc.hpp"
 
 //---------------------------------------------------------------------------------------------
@@ -136,11 +136,11 @@ void loop() {
   delay(2);
   if (VERBOSE)
     Serial.println("current set");
-  LogAppendValues();
-  if (VERBOSE)
-    Serial.println("values logged");
-  saveDataLog();
-  if (VERBOSE)
-    Serial.println("log saved");
-  delay(200);
+  // LogAppendValues();
+  // if (VERBOSE)
+  //   Serial.println("values logged");
+  // saveDataLog();
+  // if (VERBOSE)
+  //   Serial.println("log saved");
+  // delay(200);
 }
