@@ -1,10 +1,11 @@
 // vesc.cpp
 
-#ifdef AVR // or whatever -- check the compiler docs, I don't know the standard way to check this offhand
+#ifdef AVR // arduino and esp32 have different names for the same thing
 #include <stdint.h>
 #else
 #include <cstdint>
 #endif
+
 #include <Arduino.h>
 #include <SPI.h>
 #include <algorithm>
