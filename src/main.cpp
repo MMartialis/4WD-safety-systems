@@ -138,11 +138,10 @@ void loop() {
   comm_can_set_current(FR_ID, currentFR);
   comm_can_set_current(RL_ID, currentRL);
   comm_can_set_current(RR_ID, currentRR);
-  delay(2);
   if (VERBOSE)
     Serial.println("current set");
   
-  SerialBt.println(lastPwmRead);
+  bt_log("PWM: ", lastPwmRead, "\n");
   // LogAppendValues();
   // if (VERBOSE)
   //   Serial.println("values logged");

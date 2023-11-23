@@ -1,10 +1,22 @@
 // bt.hpp
 
+#include <Arduino.h>
 #include <BluetoothSerial.h>
 #include "defs.hpp"
 
+extern BluetoothSerial SerialBt;
 
 void bt_setup();
+
+char* timestamp();
+
+
+template<typename... Args>
+void bt_log(Args... args) {
+    String msg = ((String(args) + ...));
+    SerialBt.printf("%s: %s", timestamp(), msg.c_str());
+}
+
 
 // void machineLearning_status(); // print Machine Learning status on serial and bluetooth
 

@@ -13,6 +13,16 @@ void bt_setup(){
     // vTaskDelete(Handler1);
 }
 
+// timestamp string format
+char* timestamp(){
+    static char timestamp[13];
+    time_t now = time(nullptr);
+    strftime(timestamp, 9, "%H:%M:%S", localtime(&now));
+    unsigned long milliseconds = millis();
+    sprintf(timestamp+8, ".%03lu", milliseconds % 1000);
+    return timestamp;
+}
+
 // void machinelearning_status() {
 //     if (ml_status) {
 //         SerialBt.println("Machine Learning is enabled");
