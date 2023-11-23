@@ -58,35 +58,35 @@ void setup() {
 
   //*******************************************************************************************
   // PWM setup
-  pinMode(PWM_PIN, INPUT); // pwm setup
-  attachInterrupt(digitalPinToInterrupt(PWM_PIN), pwm_interrupt, CHANGE);
-  if (VERBOSE)
-    Serial.println("PWM interrupt attached");
+        // pinMode(PWM_PIN, INPUT); // pwm setup
+        // attachInterrupt(digitalPinToInterrupt(PWM_PIN), pwm_interrupt, CHANGE);
+        // if (VERBOSE)
+        //   Serial.println("PWM interrupt attached");
 
-  // Initialize SD card
-  if (VERBOSE)
-    Serial.print("Initializing SD card...");
 
   //*******************************************************************************************
   // SD setup
   // see if the card is present and can be initialized:
+  // Initialize SD card
+  if (VERBOSE)
+    Serial.print("Initializing SD card...");
+bool sd_temp = 0; //TEMP_DEBUG
   if (!SD.begin(SD_CS_PIN)) {
     Serial.println("Card failed, or not present");
-    while (1)
-      ; // don't do anything more
+    // while (1)
+    // don't do anything more
+    sd_temp = 1;
   }
-  // if (VERBOSE)
-  //   Serial.println("card initialized");
-  // resetting undefined value floats to 0.00 for SD logging
-  SD.open(findDataLogFileName(), FILE_WRITE);
+  if (sd_temp == 0){SD.open(findDataLogFileName(), FILE_WRITE);
   if (VERBOSE)
     Serial.println("log file created");
   FillLogWithZeros();
-
-  delay(100); 
+  }
+  if (VERBOSE) delay(5000); //TEMP_DEBUG
 
   //*******************************************************************************************
   // Init MCP2515
+  digitalWrite(CAN0_CS, LOW); //TEMP_DEBUG
     void mcp2515_reset(void); // Soft Reset MCP2515
   if (VERBOSE)
     Serial.print("MCP2515 Initializing...");
@@ -98,9 +98,10 @@ void setup() {
       Serial.println("MCP2515 Normal Mode Activated!");
   } else {
       Serial.println("Error Initializing MCP2515, entering infinite loop");
-    while (1)
-      ; // don't do anything more
+    // while (1)
+    // don't do anything more
   }
+
 
   xTaskCreatePinnedToCore(&core_0_setup, /* Function to implement the task */
                           "setup",       /* Name of the task */
