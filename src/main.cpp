@@ -1,13 +1,16 @@
 // main.cpp
 
+//---------------------------------------------------------------------------------------------
+// big includes, that are part of the framework
+
 #include <Arduino.h>
 // #include <BluetoothSerial.h>
-#include <SPI.h>
 #include <SD.h>
+#include <SPI.h>
 #include <cstring>
 // #include <ESP32TimerInterrupt.h>
 
-#ifdef AVR // or whatever -- check the compiler docs, I don't know the standard way to check this offhand
+#ifdef AVR // arduino and esp32 have different names for the same thing
 #include <stdint.h>
 #else
 #include <cstdint>
@@ -15,14 +18,19 @@
 
 // #include <string>
 
+//---------------------------------------------------------------------------------------------
+// small includes, that we wrote
 #include "defs.hpp"
 
-#include "vesc.hpp"
-#include "pwm.hpp"
-#include "can_comm.hpp"
-#include "bt.hpp"
-#include "sd.hpp"
 #include "./mcp_can.h"
+#include "bt.hpp"
+#include "can_comm.hpp"
+#include "pwm.hpp"
+#include "sd.hpp"
+#include "vesc.hpp"
+
+//---------------------------------------------------------------------------------------------
+// global variables
 
 extern char msgBuffer[RX_MSG_BUFFER_LEN][12];
 extern double lastPwmRead;
@@ -35,16 +43,21 @@ float currentFR = 0;
 float currentRL = 0;
 float currentRR = 0;
 
-void setup()
-{
+//---------------------------------------------------------------------------------------------
+
+void setup() {
+  Serial.begin(115200);
+  //*******************************************************************************************
+
+  ///*  Debug code, to make sure, canbus and sd are compatible  *///
+  // TODO: remove this
   pinMode(SD_CS_PIN, OUTPUT);
   digitalWrite(SD_CS_PIN, HIGH);
   pinMode(CAN0_CS, OUTPUT);
   digitalWrite(CAN0_CS, HIGH);
-  Serial.begin(115200);
-  while (!Serial)
-    ; // Wait for serial port to connect
 
+  //*******************************************************************************************
+  // PWM setup
   pinMode(PWM_PIN, INPUT); // pwm setup
   attachInterrupt(digitalPinToInterrupt(PWM_PIN), pwm_interrupt, CHANGE);
   if (VERBOSE)
@@ -53,9 +66,11 @@ void setup()
   // Initialize SD card
   if (VERBOSE)
     Serial.print("Initializing SD card...");
+
+  //*******************************************************************************************
+  // SD setup
   // see if the card is present and can be initialized:
-  if (!SD.begin(SD_CS_PIN))
-  {
+  if (!SD.begin(SD_CS_PIN)) {
     Serial.println("Card failed, or not present");
     while (1)
       ; // don't do anything more
@@ -68,49 +83,42 @@ void setup()
     Serial.println("log file created");
   FillLogWithZeros();
 
+  delay(100); 
 
-  delay(100);
+  //*******************************************************************************************
   // Init MCP2515
   if (VERBOSE)
     Serial.print("MCP2515 Initializing...");
-  if (CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK)
-  {
+  if (CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK) {
     if (VERBOSE)
       Serial.println("MCP2515 Initialized Successfully!");
     CAN0.setMode(MCP_NORMAL);
     if (VERBOSE)
       Serial.println("MCP2515 Normal Mode Activated!");
-  }
-  else
-  {
-    if (VERBOSE)
-      Serial.println("Error Initializing MCP2515...");
+  } else {
+      Serial.println("Error Initializing MCP2515, entering infinite loop");
     while (1)
       ; // don't do anything more
   }
 
-  xTaskCreatePinnedToCore(
-      &core_0_setup, /* Function to implement the task */
-      "setup",       /* Name of the task */
-      800,           /* Stack size in words */
-      NULL,          /* Task input parameter */
-      1,             /* Priority of the task */
-      &Handler0,     /* Task handle. */
-      0              /* Core where the task should run */
+  xTaskCreatePinnedToCore(&core_0_setup, /* Function to implement the task */
+                          "setup",       /* Name of the task */
+                          800,           /* Stack size in words */
+                          NULL,          /* Task input parameter */
+                          1,             /* Priority of the task */
+                          &Handler0,     /* Task handle. */
+                          0              /* Core where the task should run */
   );
 }
 
-void loop()
-{
-  if (lastPwmRead >= 0)
-  {
+//---------------------------------------------------------------------------------------------
+void loop() {
+  if (lastPwmRead >= 0) {
     currentFL = lastPwmRead * FR_MAX_CURRENT;
     currentFR = lastPwmRead * FR_MAX_CURRENT;
     currentRL = lastPwmRead * FR_MAX_CURRENT;
     currentRR = lastPwmRead * FR_MAX_CURRENT;
-  }
-  else
-  {
+  } else {
     currentFL = lastPwmRead * FR_MAX_BRAKE_CURRENT;
     currentFR = lastPwmRead * FR_MAX_BRAKE_CURRENT;
     currentRL = lastPwmRead * FR_MAX_BRAKE_CURRENT;

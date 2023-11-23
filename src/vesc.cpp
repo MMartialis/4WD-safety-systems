@@ -17,8 +17,9 @@ extern uint8_t msgCount;
 extern char msgBuffer[RX_MSG_BUFFER_LEN][12];
 
 // can IDs
-// első         53,     77
+// első   jobb  53, bal 77
 // hátsó  jobb  40, bal 13
+
 // 0x35, 0x4D, 0x28, 0x0D
 //   ezek nem jok >>  if [0] == 09 command id, [1] rx id, [2-5] erpm, [6-7] current*10, [8-9] erpm, [10] isread
 struct esc
