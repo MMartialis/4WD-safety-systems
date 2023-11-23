@@ -13,7 +13,7 @@
 // MISO  = 19;
 // SCK   = 18;
 
-bool SD_ACTIVE = 1;
+bool SD_ACTIVE = 0;
 String dataString = ""; // holds the data to be written to the SD card
 String aiString = "";
 // std::string myDataString = "";

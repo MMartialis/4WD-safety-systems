@@ -6,12 +6,15 @@
 
 extern BluetoothSerial SerialBt;
 
-bool en_pwm = true; // PWM read enabled or not
-
 void bt_setup();
 
 char* timestamp();
 
+typedef enum {
+    RESET = 'r',
+    PWM = 'p',
+    LOG = 'l',
+} bt_command;
 
 template<typename... Args>
 void bt_log(Args... args) {

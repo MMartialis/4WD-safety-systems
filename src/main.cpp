@@ -37,7 +37,14 @@ extern double lastPwmRead;
 extern MCP_CAN CAN0;
 extern BluetoothSerial SerialBt;
 
+extern esc vescFL;
+extern esc vescFR;
+extern esc vescRL;
+extern esc vescRR;
+
 TaskHandle_t Handler0;
+
+float lastPWM = 0;
 
 float currentFL = 0;
 float currentFR = 0;
@@ -110,12 +117,16 @@ void setup() {
 
   xTaskCreatePinnedToCore(&core_0_setup, /* Function to implement the task */
                           "setup",       /* Name of the task */
-                          800,           /* Stack size in words */
+                          900,           /* Stack size in words */
                           NULL,          /* Task input parameter */
                           1,             /* Priority of the task */
                           &Handler0,     /* Task handle. */
                           0              /* Core where the task should run */
   );
+
+  delay(100);
+  if (VERBOSE)
+    Serial.println("setup done");
 }
 
 //---------------------------------------------------------------------------------------------
@@ -126,16 +137,12 @@ void loop() {
     bt_cmd(SerialBt.readStringUntil('\n'));
   }
 
-  if (lastPwmRead >= 0) {
-    currentFL = lastPwmRead * FR_MAX_CURRENT;
-    currentFR = lastPwmRead * FR_MAX_CURRENT;
-    currentRL = lastPwmRead * FR_MAX_CURRENT;
-    currentRR = lastPwmRead * FR_MAX_CURRENT;
-  } else {
-    currentFL = lastPwmRead * FR_MAX_BRAKE_CURRENT;
-    currentFR = lastPwmRead * FR_MAX_BRAKE_CURRENT;
-    currentRL = lastPwmRead * FR_MAX_BRAKE_CURRENT;
-    currentRR = lastPwmRead * FR_MAX_BRAKE_CURRENT;
+  lastPWM = get_pwm();
+  if (lastPWM >= 0 || true) {
+    currentFL = lastPWM * FL_MAX_CURRENT;
+    currentFR = lastPWM * FR_MAX_CURRENT;
+    currentRL = lastPWM * RL_MAX_CURRENT;
+    currentRR = lastPWM * RR_MAX_CURRENT;
   }
   /*
    * if csúsz, apply minimum deterration to current
@@ -147,12 +154,13 @@ void loop() {
   if (VERBOSE)
     Serial.println("current set");
   
-  bt_log("PWM: ", lastPwmRead, "\n");
+  update_esc_status_control();
+  bt_log("FL erpm: ", vescFL.erpm, "FL current: ", vescFL.current, "\n");
   // LogAppendValues();
   // if (VERBOSE)
   //   Serial.println("values logged");
   // saveDataLog();
   // if (VERBOSE)
   //   Serial.println("log saved");
-  // delay(200);
+  delay(200);
 }
