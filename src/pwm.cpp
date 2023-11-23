@@ -1,4 +1,5 @@
 // pwm.cpp
+
 #include "pwm.hpp"
 
 const float pwm_multiplier_pos = pow((PWM_MAX_INTERVAL_MICROS - PWM_MEDIAN_INTERVAL_MICROS), -1);
