@@ -828,7 +828,7 @@ INT8U MCP_CAN::begin(INT8U idmodeset, INT8U speedset, INT8U clockset)
 
     // SPISettings settings(4000000, MSBFIRST, SPI_MODE0);
 
-    SPI.begin();
+    SPI.begin(SCK, MISO, MOSI, MCPCS);
     // SPI.beginTransaction(settings);
 
     // res = mcp2515_init(idmodeset, speedset, clockset);
@@ -839,7 +839,6 @@ INT8U MCP_CAN::begin(INT8U idmodeset, INT8U speedset, INT8U clockset)
     res = mcp2515_init(idmodeset, speedset, clockset);
     if (res == MCP2515_OK)
         return CAN_OK;
-
     return CAN_FAILINIT;
 }
 

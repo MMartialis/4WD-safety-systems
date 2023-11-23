@@ -51,29 +51,28 @@ void setup()
     Serial.println("PWM interrupt attached");
 
   // Initialize SD card
-  // if (VERBOSE)
-  //   Serial.print("Initializing SD card...");
-  // digitalWrite(SD_CS_PIN, LOW);
-  // // see if the card is present and can be initialized:
-  // if (!SD.begin(SD_CS_PIN))
-  // {
-  //   Serial.println("Card failed, or not present");
-  //   while (1)
-  //     ; // don't do anything more
-  // }
+  if (VERBOSE)
+    Serial.print("Initializing SD card...");
+  // see if the card is present and can be initialized:
+  if (!SD.begin(SD_CS_PIN))
+  {
+    Serial.println("Card failed, or not present");
+    while (1)
+      ; // don't do anything more
+  }
   // if (VERBOSE)
   //   Serial.println("card initialized");
-  // // resetting undefined value floats to 0.00 for SD logging
-  // SD.open(findDataLogFileName(), FILE_WRITE).close();
-  // digitalWrite(SD_CS_PIN, HIGH);
-  // if (VERBOSE)
-  //   Serial.println("log file created");
-  // FillLogWithZeros();
+  // resetting undefined value floats to 0.00 for SD logging
+  SD.open(findDataLogFileName(), FILE_WRITE);
+  if (VERBOSE)
+    Serial.println("log file created");
+  FillLogWithZeros();
 
+
+  delay(100);
   // Init MCP2515
   if (VERBOSE)
     Serial.print("MCP2515 Initializing...");
-  digitalWrite(CAN0_CS, LOW);
   if (CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK)
   {
     if (VERBOSE)
@@ -86,8 +85,9 @@ void setup()
   {
     if (VERBOSE)
       Serial.println("Error Initializing MCP2515...");
+    while (1)
+      ; // don't do anything more
   }
-  digitalWrite(CAN0_CS, HIGH);
 
   xTaskCreatePinnedToCore(
       &core_0_setup, /* Function to implement the task */
