@@ -4,116 +4,79 @@
 
 BluetoothSerial SerialBt;
 
+extern bool en_pwm; // PWM read enabled or not
+extern double lastPwmRead;
 // extern TaskHandle_t Handler1;
 
-void bt_setup(){
-    SerialBt.begin("esp_32_awd");
-    SerialBt.println("Bluetooth setup completed");
-    if (VERBOSE) Serial.println("Bluetooth setup completed");
-    // vTaskDelete(Handler1);
+// a list of words meaning enable/on
+const String enable_words[] = {"enable", "on", "true", "1"};
+// a list of words meaning disable/off
+const String disable_words[] = {"disable", "off", "false", "0"};
+
+// evaluate bluetooth command
+void bt_cmd(String cmd) {
+  // parse command by spaces
+  // first word is the command
+  String command = cmd.substring(0, cmd.indexOf(' '));
+  // switch by first word
+  switch (command) {
+  case 'reset': // reset
+    esp_reset();
+    break;
+  case 'pwm': // pwm
+    // if command[1] in enable_words:
+    if (enable_words->indexOf(command[1]) != -1) { // enable
+      pwm_enable(true);
+    } else if (disable_words->indexOf(command[1]) != -1) { // disable
+      pwm_enable(false);
+    }
+    // if no second word, just print status
+    else {
+      pwm_status();
+    }
+  }
+}
+
+void bt_setup() {
+  SerialBt.begin("esp_32_awd");
+  bt_log("Bluetooth setup completed");
+  if (VERBOSE)
+    Serial.println("Bluetooth setup completed");
+  // vTaskDelete(Handler1);
 }
 
 // timestamp string format
-char* timestamp(){
-    static char timestamp[13];
-    time_t now = time(nullptr);
-    strftime(timestamp, 9, "%H:%M:%S", localtime(&now));
-    unsigned long milliseconds = millis();
-    sprintf(timestamp+8, ".%03lu", milliseconds % 1000);
-    return timestamp;
+char *timestamp() {
+  static char timestamp[13];
+  time_t now = time(nullptr);
+  strftime(timestamp, 9, "%H:%M:%S", localtime(&now));
+  unsigned long milliseconds = millis();
+  sprintf(timestamp + 8, ".%03lu", milliseconds % 1000);
+  return timestamp;
 }
 
-// void machinelearning_status() {
-//     if (ml_status) {
-//         SerialBt.println("Machine Learning is enabled");
-//     } else {
-//         SerialBt.println("Machine Learning is disabled");
-//     }
-// }
+void esp_reset() {
+  bt_log("Resetting ESP32...");
+  Serial.println("Resetting ESP32...");
+  esp_restart();
+}
 
-// void machineLearning_set(bool on_off){ // Set Machine Learning on or off (true or false)
-//     ml_status = on_off;
-//     machinelearning_status();
-// } 
+void pwm_status() {
+  if (en_pwm) {
+    bt_log("Remote is enabled");
+  } else {
+    bt_log("Remote is disabled");
+  }
+}
 
-// void machineLearning_sdbackup(int8_t backup_id){  // create backup on sd card
-//     // TODO
-// }
-
-// void machineLearning_sdrestore(int8_t backup_id){ // restore from backup
-//     // TODO
-// } 
-
-// void machineLearning_btbackup(int8_t backup_id){ // send raw backup data over bluetooth
-//     // TODO
-// }
-
-// void machineLearning_btrestore(int8_t backup_id){ // restore from raw backup data
-//     // TODO
-// }
-
-// void esp_reset(){
-//     SerialBt.println("Resetting ESP32...");
-//     Serial.println("Resetting ESP32...");
-//     delay(100);
-//     esp_restart();
-// }
-
-// void ram_usage_print(){
-//     SerialBt.printf("RAM usage: %d", esp_get_free_heap_size());
-// }
-
-// void pwm_status(){
-//     if (pwm_state) {
-//         SerialBt.println("Remote is enabled");
-//     } else {
-//         SerialBt.println("Remote is disabled");
-//     }
-// }
-
-// void pwm_set(uint8_t em_pwm_in){ // set emulated pwm value, Warning: THIS WILL DISABLE THE REMOTE!
-//     if(pwm_state == 0){
-//         em_pwm = em_pwm_in;
-//         SerialBt.printf("PWM set to: %d", em_pwm_in);
-//     } 
-//     else {
-//         pwm_state = 0;
-//         em_pwm = em_pwm_in;
-//         SerialBt.printf("Remote disabled and const PWM set to: %d", em_pwm_in);
-//     }
-//     }
-
-// void current_set(uint8_t current){  // sets current for all motors
-//     current_lf = current;
-//     current_rf = current;
-//     current_lr = current;
-//     current_rr = current;
-//     SerialBt.printf("Current set to: %d", current);
-// }
-
-
-// void duty_set(uint8_t duty1, uint8_t duty2, uint8_t duty3, uint8_t duty4){ // left front, right front, left rear, right rear
-//     duty_lf = duty1;
-//     duty_rf = duty2;
-//     duty_lr = duty3;
-//     duty_rr = duty4;
-//     SerialBt.printf("Duty set to: %d, %d, %d, %d", duty1, duty2, duty3, duty4);
-// }
-// void duty_set(uint8_t duty){
-//     duty_lf = duty;
-//     duty_rf = duty;
-//     duty_lr = duty;
-//     duty_rr = duty;
-//     SerialBt.printf("Duty set to: %d", duty);
-
-// }
-
-
-// // void esc_status(){
-// //     SerialBt.printf();
- 
-// // } // basic status message
-
-// void esc_status(bool extended); // extended status message (true or false)
-
-// void esc_status_polling_rate(uint8_t esc_polling_rate); // polling rate is f/s
+void pwm_enable(bool enable) { // set emulated pwm value, Warning: THIS WILL
+                               // DISABLE THE REMOTE!
+  if (enable) {
+    en_pwm = true;
+    bt_log("Remote enabled");
+  } else {
+    en_pwm = false;
+    lastPwmRead = 0;
+    bt_log("Remote disabled");
+  }
+}

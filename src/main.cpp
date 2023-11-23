@@ -64,10 +64,6 @@ void setup() {
   if (VERBOSE)
     Serial.println("PWM interrupt attached");
 
-  // Initialize SD card
-  if (VERBOSE)
-    Serial.print("Initializing SD card...");
-
   //*******************************************************************************************
   // Bluetooth setup
   bt_setup();
@@ -76,6 +72,10 @@ void setup() {
   // SD setup
   // see if the card is present and can be initialized:
 
+
+  // Initialize SD card
+  // if (VERBOSE)
+  //   Serial.print("Initializing SD card...");
   // if (!SD.begin(SD_CS_PIN)) {
   //   Serial.println("Card failed, or not present");
   //   while (1)
@@ -120,6 +120,12 @@ void setup() {
 
 //---------------------------------------------------------------------------------------------
 void loop() {
+  //*******************************************************************************************
+  // Bluetooth check
+  if (SerialBt.available()) {
+    bt_cmd(SerialBt.readStringUntil('\n'));
+  }
+
   if (lastPwmRead >= 0) {
     currentFL = lastPwmRead * FR_MAX_CURRENT;
     currentFR = lastPwmRead * FR_MAX_CURRENT;
