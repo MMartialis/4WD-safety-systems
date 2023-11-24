@@ -5,13 +5,12 @@
 
 #define VERBOSE 1
 
-#define PWM_DEADZONE 15 // the deadzone for the pwm signal in microseconds
 #define FL_ID 77
 #define FL_MAX_CURRENT 60
-#define FL_MAX_BRAKE_CURRENT 60
+#define FL_MAX_BRAKE_CURRENT 75
 #define FR_ID 53
 #define FR_MAX_CURRENT 60
-#define FR_MAX_BRAKE_CURRENT 60
+#define FR_MAX_BRAKE_CURRENT 75
 #define RL_ID 13
 #define RL_MAX_CURRENT 90
 #define RL_MAX_BRAKE_CURRENT 90
@@ -27,6 +26,7 @@
 #define PWM_MIN_INTERVAL_MICROS 1108
 #define PWM_MAX_INTERVAL_MICROS 1880
 #define PWM_MEDIAN_INTERVAL_MICROS 1500
+#define PWM_DEADZONE 20 // the deadzone for the pwm signal in microseconds
 
 #define SD_LOG_ENTRY_SIZE 32
 #define SD_CS_PIN 17

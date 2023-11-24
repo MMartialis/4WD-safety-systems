@@ -4,7 +4,7 @@
 
 BluetoothSerial SerialBt;
 
-extern bool en_pwm; // PWM read enabled or not
+bool en_pwm = true; // PWM read enabled or not
 extern double lastPwmRead;
 // extern TaskHandle_t Handler1;
 
@@ -19,11 +19,11 @@ void bt_cmd(String cmd) {
   // first word is the command
   String command = cmd.substring(0, cmd.indexOf(' '));
   // switch by first word
-  switch (command) {
-  case 'reset': // reset
+  switch (command[0]) {
+  case 'r': // reset
     esp_reset();
     break;
-  case 'pwm': // pwm
+  case 'p': // pwm
     // if command[1] in enable_words:
     if (enable_words->indexOf(command[1]) != -1) { // enable
       pwm_enable(true);

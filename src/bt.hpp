@@ -6,8 +6,6 @@
 
 extern BluetoothSerial SerialBt;
 
-bool en_pwm = true; // PWM read enabled or not
-
 void bt_setup();
 
 char* timestamp();

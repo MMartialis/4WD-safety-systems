@@ -37,6 +37,8 @@ extern double lastPwmRead;
 extern MCP_CAN CAN0;
 extern BluetoothSerial SerialBt;
 
+extern esc vescFL, vescFR, vescRL, vescRR;
+
 TaskHandle_t Handler0;
 
 float currentFL = 0;
@@ -60,7 +62,7 @@ void setup() {
   //*******************************************************************************************
   // PWM setup
   pinMode(PWM_PIN, INPUT); // pwm setup
-  attachInterrupt(digitalPinToInterrupt(PWM_PIN), pwm_interrupt, CHANGE);
+  // attachInterrupt(digitalPinToInterrupt(PWM_PIN), pwm_interrupt, CHANGE);
   if (VERBOSE)
     Serial.println("PWM interrupt attached");
 
@@ -109,8 +111,8 @@ void setup() {
   }
 
   xTaskCreatePinnedToCore(&core_0_setup, /* Function to implement the task */
-                          "setup",       /* Name of the task */
-                          800,           /* Stack size in words */
+                          "core_0_setup",       /* Name of the task */
+                          3000,           /* Stack size in words */
                           NULL,          /* Task input parameter */
                           1,             /* Priority of the task */
                           &Handler0,     /* Task handle. */
@@ -147,7 +149,8 @@ void loop() {
   if (VERBOSE)
     Serial.println("current set");
   
-  bt_log("PWM: ", lastPwmRead, "\n");
+  update_esc_status_control();
+  bt_log("PWM: ", lastPwmRead, " FL erpm: ", vescFL.erpm, "\n");
   // LogAppendValues();
   // if (VERBOSE)
   //   Serial.println("values logged");
