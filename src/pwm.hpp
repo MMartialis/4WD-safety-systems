@@ -11,4 +11,6 @@ const float pwm_multiplier_neg =
 
 void pwm_interrupt(void *args);
 
+void pwm_interrupt();
+
 float get_pwm();

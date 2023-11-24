@@ -16,11 +16,11 @@ char msgBuffer[RX_MSG_BUFFER_LEN][12];
 
 void core_0_setup(void *params)
 {
-    // pinMode(CAN0_INT, INPUT);
-    // attachInterrupt(digitalPinToInterrupt(CAN0_INT), put_message_in_buffer, FALLING);
+    pinMode(CAN0_INT, INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(CAN0_INT), put_message_in_buffer, FALLING);
     if (VERBOSE)
         Serial.println("CAN0 interrupt attached");
-    vTaskDelete(Handler0);
+    // vTaskDelete(Handler0);
 }
 
 void put_message_in_buffer()

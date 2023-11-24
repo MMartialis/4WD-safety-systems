@@ -66,18 +66,18 @@ void setup() {
 
   //*******************************************************************************************
   // PWM setup
-  // pinMode(PWM_PIN, INPUT); // pwm setup
-  // attachInterrupt(digitalPinToInterrupt(PWM_PIN), pwm_interrupt, CHANGE);
-  gpio_config_t io_conf = {
-    .pin_bit_mask = PWM_PIN,
-    .mode = GPIO_MODE_INPUT,
-    .pull_up_en = GPIO_PULLUP_ENABLE,
-    .pull_down_en = GPIO_PULLDOWN_DISABLE,
-    .intr_type = GPIO_INTR_ANYEDGE,
-  };
-  gpio_config(&io_conf);
-  gpio_install_isr_service(ESP_INTR_FLAG_LEVEL2);
-  gpio_isr_handler_add(PWM_PIN, pwm_interrupt, (void*)PWM_PIN);
+  pinMode(PWM_PIN, INPUT_PULLUP); // pwm setup
+  attachInterrupt(digitalPinToInterrupt(PWM_PIN), pwm_interrupt, CHANGE);
+  // gpio_config_t io_conf = {
+  //   .pin_bit_mask = PWM_PIN,
+  //   .mode = GPIO_MODE_INPUT,
+  //   .pull_up_en = GPIO_PULLUP_ENABLE,
+  //   .pull_down_en = GPIO_PULLDOWN_DISABLE,
+  //   .intr_type = GPIO_INTR_ANYEDGE,
+  // };
+  // gpio_config(&io_conf);
+  // gpio_install_isr_service(ESP_INTR_FLAG_LEVEL2);
+  // gpio_isr_handler_add(PWM_PIN, pwm_interrupt, (void*)PWM_PIN);
 
   if (VERBOSE)
     Serial.println("PWM interrupt attached");
@@ -125,15 +125,15 @@ void setup() {
     while (1)
       ; // don't do anything more
   }
-
-  xTaskCreatePinnedToCore(&core_0_setup, /* Function to implement the task */
-                          "core_0_setup",       /* Name of the task */
-                          3000,           /* Stack size in words */
-                          NULL,          /* Task input parameter */
-                          1,             /* Priority of the task */
-                          &Handler0,     /* Task handle. */
-                          0              /* Core where the task should run */
-  );
+  core_0_setup(NULL);
+  // xTaskCreatePinnedToCore(&core_0_setup, /* Function to implement the task */
+  //                         "core_0_setup",       /* Name of the task */
+  //                         3000,           /* Stack size in words */
+  //                         NULL,          /* Task input parameter */
+  //                         1,             /* Priority of the task */
+  //                         &Handler0,     /* Task handle. */
+  //                         0              /* Core where the task should run */
+  // );
 
   delay(100);
   void mcp2515_reset(void); // Soft Reset MCP2515
