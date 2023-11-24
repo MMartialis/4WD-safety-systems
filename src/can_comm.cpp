@@ -16,45 +16,57 @@ char msgBuffer[RX_MSG_BUFFER_LEN][12];
 
 void core_0_setup(void *params)
 {
-
-    pinMode(CAN0_INT, INPUT);
+    pinMode(CAN0_INT, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(CAN0_INT), put_message_in_buffer, FALLING);
-    if (VERBOSE) Serial.println("CAN0 interrupt attached");
-    vTaskDelete(Handler0);
+    if (VERBOSE)
+        Serial.println("CAN0 interrupt attached");
+    // vTaskDelete(Handler0);
 }
 
 void put_message_in_buffer()
 {
-    extern bool SD_ACTIVE;
-    if (SD_ACTIVE != 1) digitalWrite(CAN0_CS, LOW);
-    else return;
-  for (; CAN0.readMsgBuf(&rxId, &len, rxBuf) != CAN_NOMSG;)
-  {
-    const char message[12] = {
-        (byte) (rxId >> 8),
-        (byte) rxId,
-        (byte) len,
-        rxBuf[0],
-        rxBuf[1],
-        rxBuf[2],
-        rxBuf[3],
-        rxBuf[4],
-        rxBuf[5],
-        rxBuf[6],
-        rxBuf[7],
-        0x00
-    };
-    std::copy(message, message + 12, msgBuffer[msgCount%RX_MSG_BUFFER_LEN]);
-    msgCount++;
-  }
-    digitalWrite(CAN0_CS, HIGH);
+   void *args;
+    put_message_in_buffer(args);
+}
+
+void put_message_in_buffer(void *args)
+{
+    for (; CAN0.readMsgBuf(&rxId, &len, rxBuf) != CAN_NOMSG;)
+    {
+        const char message[12] = {
+            (byte)(rxId >> 8),
+            (byte)rxId,
+            (byte)len,
+            rxBuf[0],
+            rxBuf[1],
+            rxBuf[2],
+            rxBuf[3],
+            rxBuf[4],
+            rxBuf[5],
+            rxBuf[6],
+            rxBuf[7],
+            0x00};
+        std::copy(message, message + 12, msgBuffer[msgCount % RX_MSG_BUFFER_LEN]);
+        msgCount++;
+    }
 }
 
 // Implementation for sending extended ID CAN-frames
 void can_transmit_eid(uint32_t id, const uint8_t *data, uint8_t len, uint8_t rtr)
 {
-    CAN0.sendMsgBuf((unsigned long)id, (byte)1, (byte)rtr, (byte)len, (byte * ) data);
-    if (VERBOSE) Serial.println("CAN message sent");
+    CAN0.sendMsgBuf((unsigned long)id, (byte)1, (byte)rtr, (byte)len, (byte *)data);
+    if (VERBOSE)
+    {
+        Serial.print("CAN TX: ");
+        Serial.print(id, HEX);
+        Serial.print(" ");
+        for (int i = 0; i < len; i++)
+        {
+            Serial.print(data[i], HEX);
+            Serial.print(" ");
+        }
+        Serial.println();
+    }
 }
 
 void buffer_append_int16(uint8_t *buffer, int16_t number, int32_t *index)

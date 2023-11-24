@@ -23,172 +23,190 @@ extern char msgBuffer[RX_MSG_BUFFER_LEN][12];
 
 // 0x35, 0x4D, 0x28, 0x0D
 //   ezek nem jok >>  if [0] == 09 command id, [1] rx id, [2-5] erpm, [6-7] current*10, [8-9] erpm, [10] isread
-struct esc
-{
-  uint32_t erpm;
-  float current;
-  float fet_temp;
-  float motor_temp;
-  float current_in;
-  float pid_pos;
-} Motor1, Motor2, Motor3, Motor4;
+
+esc vescFL, vescFR, vescRL, vescRR;
 
 void update_esc_status_control()
-{                    // updates the esc status variables for control funcs.
+{
   byte esc_stat = 0; // byte to store whether the escs are updated or not
-  uint8_t msgId = msgCount % RX_MSG_BUFFER_LEN;
+  uint8_t msgId = msgCount % RX_MSG_BUFFER_LEN - 1;
   uint8_t count = 0;
-  while (esc_stat != 0x0f && count <= RX_MSG_BUFFER_LEN)
+  while (esc_stat != 0x0f && count < RX_MSG_BUFFER_LEN)
   {
+    if (VERBOSE)
+    {
+      // print processed message
+      Serial.print("CAN RX: ");
+      for (int i = 0; i < 12; i++)
+      {
+        Serial.print(msgBuffer[msgId][i], HEX);
+        Serial.print(" ");
+      }
+      // print esc_stat bit by bit
+      for (int i = 3; i >= 0; i--)
+      {
+        Serial.print((esc_stat >> i) & 0x01, BIN);
+      }
+      Serial.print(" ");
+    }
+    count++;
     if (msgBuffer[msgId][0] != 0x09)
     {
-      msgId--;
-      if (msgId > RX_MSG_BUFFER_LEN - 1)
+      if (VERBOSE)
       {
-        msgId = RX_MSG_BUFFER_LEN - 1;
-      }
-      count++;
-      continue;
-    }
-    if (msgBuffer[msgId][12] == 1)
-    { // if the message is a read message
-      switch (msgBuffer[msgId][1])
-      {
-      case FL_ID:
-        esc_stat |= 0b00000001;
-        break;
-      case FR_ID:
-        esc_stat |= 0b00000010;
-        break;
-      case RL_ID:
-        esc_stat |= 0b00000100;
-        break;
-      case RR_ID:
-        esc_stat |= 0b00001000;
-        break;
-      default:
-        break;
+        Serial.println("not staus 1");
       }
       msgId--;
       if (msgId > RX_MSG_BUFFER_LEN - 1)
       {
         msgId = RX_MSG_BUFFER_LEN - 1;
       }
-      count++;
       continue;
     }
-
-    esc *myMotor;
     switch (msgBuffer[msgId][1])
     {
     case FL_ID:
-      myMotor = &Motor1;
-      esc_stat = esc_stat | 0b00000001;
+      esc_stat |= 0b00000001;
       break;
     case FR_ID:
-      myMotor = &Motor2;
-      esc_stat = esc_stat | 0b00000010;
+      esc_stat |= 0b00000010;
       break;
     case RL_ID:
-      myMotor = &Motor3;
-      esc_stat = esc_stat | 0b00000100;
+      esc_stat |= 0b00000100;
       break;
     case RR_ID:
-      myMotor = &Motor4;
-      esc_stat = esc_stat | 0b00001000;
+      esc_stat |= 0b00001000;
       break;
     default:
       break;
     }
-    msgBuffer[msgId][12] = 1; // set the message to read
-    (*myMotor).erpm = (msgBuffer[msgId][2] << 24) |
-                      (msgBuffer[msgId][3] << 16) |
-                      (msgBuffer[msgId][4] << 8) |
-                      (msgBuffer[msgId][5]);
+    if (msgBuffer[msgId][11] == 1)
+    { // if the message is a read message
+      if (VERBOSE)
+      {
+        Serial.println("already read message");
+      }
+      msgId--;
+      if (msgId > RX_MSG_BUFFER_LEN - 1)
+      {
+        msgId = RX_MSG_BUFFER_LEN - 1;
+      }
+      continue;
+    }
 
-    (*myMotor).current = float(((msgBuffer[msgId][8] << 8) | (msgBuffer[msgId][9])) / 10.0);
+    msgBuffer[msgId][11] = 1; // set the message to read
+    esc *myMotor;
+    switch (msgBuffer[msgId][1])
+    {
+    case FL_ID:
+      myMotor = &vescFL;
+      break;
+    case FR_ID:
+      myMotor = &vescFR;
+      break;
+    case RL_ID:
+      myMotor = &vescRL;
+      break;
+    case RR_ID:
+      myMotor = &vescRR;
+      break;
+    default:
+      break;
+    }
+    (*myMotor).erpm = (msgBuffer[msgId][3] << 24) |
+                      (msgBuffer[msgId][4] << 16) |
+                      (msgBuffer[msgId][5] << 8) |
+                      (msgBuffer[msgId][6]);
+
+    (*myMotor).current = float(((msgBuffer[msgId][7] << 8) | (msgBuffer[msgId][8])) / 10.0);
     msgId--;
     if (msgId > RX_MSG_BUFFER_LEN - 1)
     {
       msgId = RX_MSG_BUFFER_LEN - 1;
     }
-    count++;
+    if (VERBOSE)
+    {
+      Serial.print("current: ");
+      Serial.print((*myMotor).current);
+      Serial.print(" erpm: ");
+      Serial.println((*myMotor).erpm);
+    }
   }
 }
 
 //   ezek nem jok >>  if [0] == 16 command id, [1] rx id, [2-3] fet temp*10, [4-5] motor temp*10, [6-7] current in*10, [8-9] pid pos*50],
-void update_esc_status_log()
-{
-  byte esc_stat = 0; // byte to store whether the escs are updated or not
-  uint8_t msgId = msgCount % RX_MSG_BUFFER_LEN;
-  uint8_t count = 0;
-  while (esc_stat != 0x0f && count <= RX_MSG_BUFFER_LEN)
-  {
-    if (msgBuffer[msgId][0] != 0x09)
-    {
-      msgId--;
-      if (msgId > RX_MSG_BUFFER_LEN - 1)
-      {
-        msgId = RX_MSG_BUFFER_LEN - 1;
-      }
-      count++;
-      continue;
-    }
+// void update_esc_status_log()
+// {
+//   byte esc_stat = 0; // byte to store whether the escs are updated or not
+//   uint8_t msgId = msgCount % RX_MSG_BUFFER_LEN;
+//   uint8_t count = 0;
+//   while (esc_stat != 0x0f && count <= RX_MSG_BUFFER_LEN)
+//   {
+//     if (msgBuffer[msgId][0] != 0x09)
+//     {
+//       msgId--;
+//       if (msgId > RX_MSG_BUFFER_LEN - 1)
+//       {
+//         msgId = RX_MSG_BUFFER_LEN - 1;
+//       }
+//       count++;
+//       continue;
+//     }
 
-    if (msgBuffer[msgId][12] == 1)
-    { // if the message is a read message
-      switch (msgBuffer[msgId][1])
-      {
-      case 0x35:
-        esc_stat |= 0b00000001;
-        break;
-      case 0x4D:
-        esc_stat |= 0b00000010;
-        break;
-      case 0x28:
-        esc_stat |= 0b00000100;
-        break;
-      case 0x0D:
-        esc_stat |= 0b00001000;
-        break;
-      default:
-        break;
-      }
-      msgId--;
-      if (msgId > RX_MSG_BUFFER_LEN - 1)
-      {
-        msgId = RX_MSG_BUFFER_LEN - 1;
-      }
-      count++;
-      continue;
-    }
+//     if (msgBuffer[msgId][11] == 1)
+//     { // if the message is a read message
+//       switch (msgBuffer[msgId][1])
+//       {
+//       case 0x35:
+//         esc_stat |= 0b00000001;
+//         break;
+//       case 0x4D:
+//         esc_stat |= 0b00000010;
+//         break;
+//       case 0x28:
+//         esc_stat |= 0b00000100;
+//         break;
+//       case 0x0D:
+//         esc_stat |= 0b00001000;
+//         break;
+//       default:
+//         break;
+//       }
+//       msgId--;
+//       if (msgId > RX_MSG_BUFFER_LEN - 1)
+//       {
+//         msgId = RX_MSG_BUFFER_LEN - 1;
+//       }
+//       count++;
+//       continue;
+//     }
 
-    if (msgBuffer[msgId][0] == 0x16)
-    {
-      esc *myMotor;
-      switch (msgBuffer[msgId][1])
-      {
-      case 0x35:
-        myMotor = &Motor1;
-      case 0x4D:
-        myMotor = &Motor2;
-        break;
-      case 0x28:
-        myMotor = &Motor3;
-        break;
-      case 0x0D:
-        myMotor = &Motor4;
-        break;
-      default:
-        break;
-      }
-      msgBuffer[msgId][12] = 1; // set the message to read
-      (*myMotor).fet_temp = float(((msgBuffer[msgId][2] << 8) | (msgBuffer[msgId][3])) / 10.0);
-      (*myMotor).motor_temp = float(((msgBuffer[msgId][4] << 8) | (msgBuffer[msgId][5])) / 10.0);
-      (*myMotor).current_in = float(((msgBuffer[msgId][6] << 8) | (msgBuffer[msgId][7])) / 10.0);
-      (*myMotor).pid_pos = float(((msgBuffer[msgId][8] << 8) | (msgBuffer[msgId][9])) / 50.0);
-      break;
-    }
-    count++;
-  }
-}
+//     if (msgBuffer[msgId][0] == 0x16)
+//     {
+//       esc *myMotor;
+//       switch (msgBuffer[msgId][1])
+//       {
+//       case 0x35:
+//         myMotor = &vescFL;
+//       case 0x4D:
+//         myMotor = &vescFR;
+//         break;
+//       case 0x28:
+//         myMotor = &vescRL;
+//         break;
+//       case 0x0D:
+//         myMotor = &vescRR;
+//         break;
+//       default:
+//         break;
+//       }
+//       msgBuffer[msgId][12] = 1; // set the message to read
+//       (*myMotor).fet_temp = float(((msgBuffer[msgId][2] << 8) | (msgBuffer[msgId][3])) / 10.0);
+//       (*myMotor).motor_temp = float(((msgBuffer[msgId][4] << 8) | (msgBuffer[msgId][5])) / 10.0);
+//       (*myMotor).current_in = float(((msgBuffer[msgId][6] << 8) | (msgBuffer[msgId][7])) / 10.0);
+//       (*myMotor).pid_pos = float(((msgBuffer[msgId][8] << 8) | (msgBuffer[msgId][9])) / 50.0);
+//       break;
+//     }
+//     count++;
+//   }
+// }

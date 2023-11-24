@@ -25,7 +25,9 @@ typedef enum
 
 void core_0_setup(void* params);
 
-void put_message_in_buffer(void);
+void put_message_in_buffer(void *pvParameters);
+
+void put_message_in_buffer();
 
 void buffer_append_int16(uint8_t *buffer, int16_t number, int32_t *index);
 
