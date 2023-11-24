@@ -7,7 +7,7 @@ extern bool en_pwm; // PWM read enabled or not
 unsigned long last_time = micros();
 int16_t lastPwmRead = 0; // the global variable that stores the last pwm read
 
-void pwm_interrupt()
+void pwm_interrupt(void *args)
 {
   unsigned long time = micros();
   if ((time - last_time) < 3000)
@@ -31,7 +31,7 @@ float get_pwm()
   {
     return 0;
   }
-  if (lastPwmRead < 0)
+  if (lastPwmRead > 0)
   {
     return float(lastPwmRead) * pwm_multiplier_pos;
   }

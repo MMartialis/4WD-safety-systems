@@ -9,6 +9,6 @@ const float pwm_multiplier_pos =
 const float pwm_multiplier_neg =
     pow((PWM_MEDIAN_INTERVAL_MICROS - PWM_MIN_INTERVAL_MICROS), -1);
 
-void pwm_interrupt();
+void pwm_interrupt(void *args);
 
 float get_pwm();

@@ -48,7 +48,6 @@ class MCP_CAN
    // private:
    private:
 
-    void mcp2515_reset(void);                                           // Soft Reset MCP2515
 
     INT8U mcp2515_readRegister(const INT8U address);                    // Read MCP2515 register
   
@@ -109,6 +108,7 @@ public:
     MCP_CAN(INT8U _CS);
     INT8U begin(INT8U idmodeset, INT8U speedset, INT8U clockset);       // Initialize controller parameters
   
+    void mcp2515_reset(void);                                           // Soft Reset MCP2515
 
     INT8U init_Mask(INT8U num, INT8U ext, INT32U ulData);               // Initialize Mask(s)
     INT8U init_Mask(INT8U num, INT32U ulData);                          // Initialize Mask(s)

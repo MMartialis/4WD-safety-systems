@@ -16,16 +16,20 @@ char msgBuffer[RX_MSG_BUFFER_LEN][12];
 
 void core_0_setup(void *params)
 {
-
-    pinMode(CAN0_INT, INPUT);
-    attachInterrupt(digitalPinToInterrupt(CAN0_INT), put_message_in_buffer, FALLING);
+    // pinMode(CAN0_INT, INPUT);
+    // attachInterrupt(digitalPinToInterrupt(CAN0_INT), put_message_in_buffer, FALLING);
     if (VERBOSE)
         Serial.println("CAN0 interrupt attached");
-    put_message_in_buffer();
     vTaskDelete(Handler0);
 }
 
 void put_message_in_buffer()
+{
+   void *args;
+    put_message_in_buffer(args);
+}
+
+void put_message_in_buffer(void *args)
 {
     for (; CAN0.readMsgBuf(&rxId, &len, rxBuf) != CAN_NOMSG;)
     {
