@@ -5,10 +5,10 @@
 
 #define VERBOSE 1
 
-#define FL_ID 77
+#define FL_ID 53
 #define FL_MAX_CURRENT 60
 #define FL_MAX_BRAKE_CURRENT 75
-#define FR_ID 53
+#define FR_ID 77
 #define FR_MAX_CURRENT 60
 #define FR_MAX_BRAKE_CURRENT 75
 #define RL_ID 13

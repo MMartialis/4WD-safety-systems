@@ -165,12 +165,14 @@ void loop() {
 
   // gpio_isr_handler_remove(CAN0_INT_PIN);
   gpio_set_intr_type(CAN0_INT_PIN, GPIO_INTR_DISABLE);
+
   comm_can_set_current(FL_ID, currentFL);
   comm_can_set_current(FR_ID, currentFR);
   comm_can_set_current(RL_ID, currentRL);
   comm_can_set_current(RR_ID, currentRR);
   // can_setup_gpio_interrupt();
-  gpio_set_intr_type(CAN0_INT_PIN, GPIO_INTR_LOW_LEVEL);
+  gpio_set_intr_type(CAN0_INT_PIN, GPIO_INTR_NEGEDGE);
+  put_message_in_buffer(NULL);
   if (VERBOSE)
     Serial.println("current set");
   
@@ -182,5 +184,4 @@ void loop() {
   // saveDataLog();
   // if (VERBOSE)
   //   Serial.println("log saved");
-  delay(20);
 }

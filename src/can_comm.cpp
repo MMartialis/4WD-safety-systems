@@ -3,7 +3,6 @@
 #include "can_comm.hpp"
 #include "driver/gpio.h"
 
-
 #include "soc/rtc_wdt.h"
 
 extern TaskHandle_t Handler0;
@@ -24,25 +23,26 @@ unsigned long interrupt_middle = micros();
 
 unsigned long interrupt_end = micros();
 
-
 void can_configure_gpio_interrupt() {
-    gpio_config_t io_conf;
-    io_conf.intr_type = GPIO_INTR_LOW_LEVEL; // Interrupt on rising or falling edge
-    io_conf.pin_bit_mask = (1ULL << CAN0_INT_PIN); // Bitmask for the pin
-    io_conf.mode = GPIO_MODE_INPUT; // Set as input mode
-    io_conf.pull_up_en = GPIO_PULLUP_DISABLE; // Disable pull-up
-    io_conf.pull_down_en = GPIO_PULLDOWN_ENABLE; // Enable pull-down
-    gpio_config(&io_conf);
+  gpio_config_t io_conf;
+  io_conf.intr_type =
+      GPIO_INTR_NEGEDGE; // Interrupt on rising or falling edge
+  io_conf.pin_bit_mask = (1ULL << CAN0_INT_PIN); // Bitmask for the pin
+  io_conf.mode = GPIO_MODE_INPUT;                // Set as input mode
+  io_conf.pull_up_en = GPIO_PULLUP_DISABLE;      // Disable pull-up
+  io_conf.pull_down_en = GPIO_PULLDOWN_ENABLE;   // Enable pull-down
+  gpio_config(&io_conf);
 }
 
 void can_setup_gpio_interrupt() {
-    gpio_isr_handler_add(CAN0_INT_PIN, put_message_in_buffer, NULL); // Attach the handler to the GPIO pin
+  gpio_isr_handler_add(CAN0_INT_PIN, put_message_in_buffer,
+                       NULL); // Attach the handler to the GPIO pin
 }
 
 void core_0_setup(void *params) {
   // attachInterrupt(digitalPinToInterrupt(CAN0_INT), put_message_in_buffer,
   //                 FALLING);
-  can_setup_gpio_interrupt(); // Set up interrupt handler for GPIO pin
+  can_setup_gpio_interrupt();     // Set up interrupt handler for GPIO pin
   can_configure_gpio_interrupt(); // Configure GPIO pin for interrupt
 
   // put_message_in_buffer(NULL);
@@ -51,18 +51,20 @@ void core_0_setup(void *params) {
   vTaskDelete(Handler0);
 }
 
-void IRAM_ATTR put_message_in_buffer(void* arg) {
-  CAN0.readMsgBuf(&rxId, &len, rxBuf);
-  volatile const uint8_t msgId = (msgCount) % RX_MSG_BUFFER_LEN;
-  msgBuffer[msgId][0] = (byte)(rxId >> 8);
-  msgBuffer[msgId][1] = (byte)rxId;
-  msgBuffer[msgId][2] = (byte)len;
-  std::copy(rxBuf, rxBuf + 8, msgBuffer[msgId] + 3);
-  msgBuffer[msgId][11] = 0x00;
-  msgCount++;
-  // const char message[12] = {
-  //     (byte)(rxId >> 8), (byte)rxId, (byte)len, rxBuf[0], rxBuf[1], rxBuf[2],
-  //     rxBuf[3],          rxBuf[4],   rxBuf[5],  rxBuf[6], rxBuf[7], 0x00};
+void IRAM_ATTR put_message_in_buffer(void *arg) {
+  // if (CAN0.readMsgBuf(&rxId, &len, rxBuf) == CAN_NOMSG) {
+  //   return;
+  // }
+  while (CAN0.readMsgBuf(&rxId, &len, rxBuf) != CAN_NOMSG)
+  {  
+    volatile const uint8_t msgId = (msgCount) % RX_MSG_BUFFER_LEN;
+    msgBuffer[msgId][0] = (byte)(rxId >> 8);
+    msgBuffer[msgId][1] = (byte)rxId;
+    msgBuffer[msgId][2] = (byte)len;
+    std::copy(rxBuf, rxBuf + 8, msgBuffer[msgId] + 3);
+    msgBuffer[msgId][11] = 0x00;
+    msgCount++;
+  }
 }
 
 // void put_message_in_buffer() {
@@ -75,8 +77,10 @@ void IRAM_ATTR put_message_in_buffer(void* arg) {
 //     msgBuffer[msgId][11] = 0x00;
 //     msgCount++;
 //     // const char message[12] = {
-//     //     (byte)(rxId >> 8), (byte)rxId, (byte)len, rxBuf[0], rxBuf[1], rxBuf[2],
-//     //     rxBuf[3],          rxBuf[4],   rxBuf[5],  rxBuf[6], rxBuf[7], 0x00};
+//     //     (byte)(rxId >> 8), (byte)rxId, (byte)len, rxBuf[0], rxBuf[1],
+//     rxBuf[2],
+//     //     rxBuf[3],          rxBuf[4],   rxBuf[5],  rxBuf[6], rxBuf[7],
+//     0x00};
 //   }
 // }
 
