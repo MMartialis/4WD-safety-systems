@@ -16,6 +16,10 @@
 #include <cstdint>
 #endif
 
+#include "soc/rtc_wdt.h"
+#include "soc/timer_group_struct.h"
+#include "soc/timer_group_reg.h"
+
 // #include <string>
 
 //---------------------------------------------------------------------------------------------
@@ -46,23 +50,35 @@ float currentFR = 0;
 float currentRL = 0;
 float currentRR = 0;
 
+extern unsigned long interrupt_beggining;
+extern unsigned long interrupt_middle;
+extern unsigned long interrupt_end;
+
 //---------------------------------------------------------------------------------------------
 
 void setup() {
-  Serial.begin(115200);
-  //*******************************************************************************************
+// TIMERG1.wdt_wprotect = TIMG_WDT_WKEY_VALUE; // Unlock timer config.
+// TIMERG1.wdt_feed = 1; // Reset feed count.
+// TIMERG1.wdt_config0.en = 0; // Disable timer.
+// TIMERG1.wdt_wprotect = 0; // Lock timer config.
 
-  ///*  Debug code, to make sure, canbus and sd are compatible  *///
-  // TODO: remove this
-  pinMode(SD_CS_PIN, OUTPUT);
-  digitalWrite(SD_CS_PIN, HIGH);
-  pinMode(CAN0_CS, OUTPUT);
-  digitalWrite(CAN0_CS, HIGH);
+// TIMERG0.wdt_wprotect = TIMG_WDT_WKEY_VALUE;
+// TIMERG0.wdt_feed = 1;
+// TIMERG0.wdt_config0.en = 0;
+// TIMERG0.wdt_wprotect = 0;
+  Serial.begin(115200);
+  // rtc_wdt_protect_off();
+  // rtc_wdt_disable();
+  gpio_install_isr_service(0); // Install the driver's GPIO ISR handler service
 
   //*******************************************************************************************
   // PWM setup
-  pinMode(PWM_PIN, INPUT); // pwm setup
+  // pinMode(PWM_PIN, INPUT); // pwm setup
   // attachInterrupt(digitalPinToInterrupt(PWM_PIN), pwm_interrupt, CHANGE);
+
+  pwm_setup_gpio_interrupt(); // Set up interrupt handler for GPIO pin
+  pwm_configure_gpio_interrupt(); // Configure GPIO pin for interrupt
+
   if (VERBOSE)
     Serial.println("PWM interrupt attached");
 
@@ -118,6 +134,8 @@ void setup() {
                           &Handler0,     /* Task handle. */
                           0              /* Core where the task should run */
   );
+
+
 }
 
 //---------------------------------------------------------------------------------------------
@@ -142,10 +160,17 @@ void loop() {
   /*
    * if csúsz, apply minimum deterration to current
    */
+  // disable can interrupt
+
+
+  // gpio_isr_handler_remove(CAN0_INT_PIN);
+  gpio_set_intr_type(CAN0_INT_PIN, GPIO_INTR_DISABLE);
   comm_can_set_current(FL_ID, currentFL);
   comm_can_set_current(FR_ID, currentFR);
   comm_can_set_current(RL_ID, currentRL);
   comm_can_set_current(RR_ID, currentRR);
+  // can_setup_gpio_interrupt();
+  gpio_set_intr_type(CAN0_INT_PIN, GPIO_INTR_LOW_LEVEL);
   if (VERBOSE)
     Serial.println("current set");
   
@@ -157,5 +182,5 @@ void loop() {
   // saveDataLog();
   // if (VERBOSE)
   //   Serial.println("log saved");
-  // delay(200);
+  delay(20);
 }

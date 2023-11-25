@@ -1,6 +1,7 @@
 // pwm.cpp
 
 #include "pwm.hpp"
+#include "soc/rtc_wdt.h"
 
 extern bool en_pwm; // PWM read enabled or not
 
@@ -12,8 +13,25 @@ const float pwm_multiplier_neg =
 unsigned long last_time = micros();
 double lastPwmRead = 0; // the global variable that stores the last pwm read
 
+void pwm_configure_gpio_interrupt() {
+    gpio_config_t io_conf;
+    io_conf.intr_type = GPIO_INTR_ANYEDGE; // Interrupt on rising or falling edge
+    io_conf.pin_bit_mask = (1ULL << PWM_PIN_PIN); // Bitmask for the pin
+    io_conf.mode = GPIO_MODE_INPUT; // Set as input mode
+    io_conf.pull_up_en = GPIO_PULLUP_ENABLE; // Disable pull-up
+    io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE; // Enable pull-down
+    // increase timeout to avoid watchdog trigger
 
-void pwm_interrupt() {
+    gpio_config(&io_conf);
+}
+
+void pwm_setup_gpio_interrupt() {
+    gpio_isr_handler_add(PWM_PIN_PIN, pwm_interrupt, NULL); // Attach the handler to the GPIO pin
+}
+
+
+
+void IRAM_ATTR pwm_interrupt(void* arg) {
   if (!en_pwm) return;
   unsigned long time = micros();
   if ((time - last_time) <

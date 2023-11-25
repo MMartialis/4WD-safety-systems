@@ -8,6 +8,7 @@ extern MCP_CAN CAN0;
 
 void can_transmit_eid(uint32_t id, const uint8_t *data, uint8_t len);
 
+
 typedef enum
 {
     CAN_PACKET_SET_DUTY = 0,
@@ -25,7 +26,11 @@ typedef enum
 
 void core_0_setup(void* params);
 
-void put_message_in_buffer(void);
+void can_setup_gpio_interrupt();
+
+void can_configure_gpio_interrupt();
+
+void IRAM_ATTR put_message_in_buffer(void* arg);
 
 void buffer_append_int16(uint8_t *buffer, int16_t number, int32_t *index);
 
