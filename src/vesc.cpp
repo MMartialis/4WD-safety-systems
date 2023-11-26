@@ -29,7 +29,7 @@ esc vescFL, vescFR, vescRL, vescRR;
 void update_esc_status_control() { // updates the esc status variables for
                                    // control funcs.
   byte esc_stat = 0; // byte to store whether the escs are updated or not
-  uint8_t msgId = (msgCount - 1) % RX_MSG_BUFFER_LEN; 
+  uint8_t msgId = (uint8_t) (msgCount - 1) % RX_MSG_BUFFER_LEN; 
   // uint8_t count = 0; // number of messages processed, stops after RX_MSG_BUFFER_LEN
 
   //--------------------------------------------------------------------------------
@@ -40,7 +40,7 @@ void update_esc_status_control() { // updates the esc status variables for
   {
     if (VERBOSE) {
       // print can message
-      Serial.printf("CAN RX: msgId: %d com: %.2X id: %d len: %d data: %.2X %.2X %.2X %.2X %.2X %.2X %.2X %.2X:", msgId,
+      Serial.printf("msgId: %d, CAN RX: com: %.2X id: %d len: %d data: %.2X %.2X %.2X %.2X %.2X %.2X %.2X %.2X:", msgId,
         msgBuffer[msgId][0], msgBuffer[msgId][1], msgBuffer[msgId][2], msgBuffer[msgId][3], msgBuffer[msgId][4], msgBuffer[msgId][5], msgBuffer[msgId][6], msgBuffer[msgId][7], msgBuffer[msgId][8], msgBuffer[msgId][9], msgBuffer[msgId][10]);
     }
     // verifying command id

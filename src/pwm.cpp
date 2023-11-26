@@ -13,9 +13,9 @@ intr_handle_t handlePWM; // Declare the handle variable globally or in an
                          // appropriate scope
 
 const float pwm_multiplier_pos = pow(
-    (PWM_MAX_INTERVAL_MICROS - PWM_MEDIAN_INTERVAL_MICROS + PWM_DEADZONE), -1);
+    (PWM_MAX_INTERVAL_MICROS - PWM_MEDIAN_INTERVAL_MICROS - PWM_DEADZONE), -1);
 const float pwm_multiplier_neg = pow(
-    (PWM_MEDIAN_INTERVAL_MICROS - PWM_DEADZONE - PWM_MIN_INTERVAL_MICROS), -1);
+    (PWM_MEDIAN_INTERVAL_MICROS - PWM_MIN_INTERVAL_MICROS - PWM_DEADZONE), -1);
 
 volatile unsigned long long last_time = esp_timer_get_time();
 
@@ -86,14 +86,14 @@ float get_pwm() {
     pwm_was_not_zero = 0;
     return 0;
   } else {
-    if (pwm_was_not_zero>2) {
+    if (pwm_was_not_zero>=2) {
       if (pwm_value > 0) {
         return float(pwm_value - PWM_DEADZONE) * pwm_multiplier_pos;
       } else {
         return float(pwm_value + PWM_DEADZONE) * pwm_multiplier_neg;
       }
     } else {
-      pwm_was_not_zero++;
+      pwm_was_not_zero = pwm_was_not_zero  ? 1 : 3;
       return 0;
     }
   }

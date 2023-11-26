@@ -43,6 +43,7 @@ extern BluetoothSerial SerialBt;
 extern esc vescFL, vescFR, vescRL, vescRR;
 
 TaskHandle_t Handler0;
+TaskHandle_t HandlerBt;
 
 float currentFL = 0;
 float currentFR = 0;
@@ -52,6 +53,32 @@ float currentRR = 0;
 float pwm = 0;
 
 //---------------------------------------------------------------------------------------------
+
+void bt_log_csv(void *params){
+  while(1){
+    char log[100] = "";
+    sprintf(log, "%.2f,%.2d,%.2f,%.2f,%.2d,%.2f,%.2f,%.2d,%.2f,%.2f,%.2d,%.2f,%.2f\n", pwm,
+    vescFL.erpm, vescFL.current, currentFL,
+    vescFR.erpm, vescFR.current, currentFR,
+    vescRL.erpm, vescRL.current, currentRL,
+    vescRR.erpm, vescRR.current, currentRR);
+    // Serial.println(log);
+    bt_log((String)log);
+    // bt_log(pwm,
+    //  vescFL.erpm, vescFL.current, currentFL,
+    //  vescFR.erpm, vescFR.current, currentFR,
+    //  vescRL.erpm, vescRL.current, currentRL,
+    //  vescRR.erpm, vescRR.current, currentRR,
+    // "\n");
+    // bt_log("PWM: ", pwm,
+    // "FLe: ", vescFL.erpm, ", FLc: ", vescFL.current,", FLs: ", currentFL,
+    // "FRe: ", vescFR.erpm, ", FRc: ", vescFR.current,", FRs: ", currentFR,
+    // "RLe: ", vescRL.erpm, ", RLc: ", vescRL.current,", RLs: ", currentRL,
+    // "RRe: ", vescRR.erpm, ", RRc: ", vescRR.current,", RRs: ", currentRR,
+    // "\n");
+    vTaskDelay(1 / portTICK_PERIOD_MS);
+  }
+}
 
 void setup() {
   Serial.begin(115200);
@@ -72,14 +99,28 @@ void setup() {
   // Bluetooth setup
   bt_setup();
 
+  xTaskCreatePinnedToCore(&bt_log_csv, /* Function to implement the task */
+                          "bt_log_csv",       /* Name of the task */
+                          3000,           /* Stack size in words */
+                          NULL,          /* Task input parameter */
+                          1,             /* Priority of the task */
+                          &HandlerBt,     /* Task handle. */
+                          0              /* Core where the task should run */
+  );
+
   //*******************************************************************************************
   // Init MCP2515
     void mcp2515_reset(void); // Soft Reset MCP2515
   if (VERBOSE)
     Serial.print("MCP2515 Initializing...");
+    // CAN0.init_Mask(0, 1, 0xff00 & 0); // Init Mask
+    // CAN0.init_Mask(1, 1, 0xff00 & 0); // Init Mask
+    // CAN0.init_Filt(0, 1, (STATUS_1_COMMAND_ID << 8)); // Init Filter 0
+    // CAN0.init_Filt(2, 1, (STATUS_1_COMMAND_ID << 8)); // Init Filter 1
   if (CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK) {
     if (VERBOSE)
       Serial.println("MCP2515 Initialized Successfully!");
+
     CAN0.setMode(MCP_NORMAL);
     if (VERBOSE)
       Serial.println("MCP2515 Normal Mode Activated!");
@@ -112,15 +153,15 @@ void loop() {
   pwm = get_pwm();
 
   if (pwm >= 0) {
-    currentFL = pwm * FR_MAX_CURRENT;
+    currentFL = pwm * FL_MAX_CURRENT;
     currentFR = pwm * FR_MAX_CURRENT;
-    currentRL = pwm * FR_MAX_CURRENT;
-    currentRR = pwm * FR_MAX_CURRENT;
+    currentRL = pwm * RL_MAX_CURRENT;
+    currentRR = pwm * RR_MAX_CURRENT;
   } else {
-    currentFL = pwm * FR_MAX_BRAKE_CURRENT;
+    currentFL = pwm * FL_MAX_BRAKE_CURRENT;
     currentFR = pwm * FR_MAX_BRAKE_CURRENT;
-    currentRL = pwm * FR_MAX_BRAKE_CURRENT;
-    currentRR = pwm * FR_MAX_BRAKE_CURRENT;
+    currentRL = pwm * RL_MAX_BRAKE_CURRENT;
+    currentRR = pwm * RR_MAX_BRAKE_CURRENT;
   }
   /*
    * if csúsz, apply minimum deterration to current
@@ -136,14 +177,17 @@ void loop() {
   comm_can_set_current(FR_ID, currentFR);
   comm_can_set_current(RL_ID, currentRL);
   comm_can_set_current(RR_ID, currentRR);
+  update_esc_status_control();
   gpio_intr_enable(CAN0_INT_PIN);
   // put_message_in_buffer(NULL);
   // if (VERBOSE)
   //   Serial.println("current set");
   
-  update_esc_status_control();
-  bt_log("PWM: ", pwm, " FL erpm: ", vescFL.erpm, "\n");
-  // LogAppendValues();
+
+  
+  
+  
+   // LogAppendValues();
   // if (VERBOSE)
   //   Serial.println("values logged");
   // saveDataLog();

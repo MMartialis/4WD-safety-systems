@@ -2,8 +2,16 @@
 
 #include "can_comm.hpp"
 #include "driver/gpio.h"
+#include "bt.hpp"
+#include "vesc.hpp"
 
 #include "soc/rtc_wdt.h"
+
+// loggign vars
+extern float pwm;
+extern esc vescFL, vescFR, vescRL, vescRR;
+extern float currentFL, currentFR, currentRL, currentRR;
+
 
 extern TaskHandle_t Handler0;
 extern bool SD_ACTIVE;
@@ -50,6 +58,8 @@ void core_0_setup(void *params) {
   // put_message_in_buffer(NULL);
   if (VERBOSE)
     Serial.println("CAN0 interrupt attached");
+  // while(1){
+  // }
   vTaskDelete(Handler0);
 }
 

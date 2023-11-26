@@ -15,16 +15,17 @@
 #define FR_MAX_CURRENT 60
 #define FR_MAX_BRAKE_CURRENT 75
 #define RL_ID 13 // 0x0D
-#define RL_MAX_CURRENT 90
-#define RL_MAX_BRAKE_CURRENT 90
+#define RL_MAX_CURRENT 0
+#define RL_MAX_BRAKE_CURRENT 0
 #define RR_ID 40 // 0x28
-#define RR_MAX_CURRENT 90
-#define RR_MAX_BRAKE_CURRENT 90
+#define RR_MAX_CURRENT 0
+#define RR_MAX_BRAKE_CURRENT 0
 
 #define CAN0_INT 21
 #define CAN0_INT_PIN GPIO_NUM_21
 #define CAN0_CS 5
 #define RX_MSG_BUFFER_LEN 8
+#define STATUS_1_COMMAND_ID 9
 
 #define PWM_PIN 2
 #define PWM_PIN_PIN GPIO_NUM_2
