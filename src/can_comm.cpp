@@ -51,12 +51,14 @@ void core_0_setup(void *params) {
   vTaskDelete(Handler0);
 }
 
+
+
 void IRAM_ATTR put_message_in_buffer(void *arg) {
-  // if (CAN0.readMsgBuf(&rxId, &len, rxBuf) == CAN_NOMSG) {
-  //   return;
+  if (CAN0.readMsgBuf(&rxId, &len, rxBuf) != CAN_NOMSG) {
+    // return;
   // }
-  while (CAN0.readMsgBuf(&rxId, &len, rxBuf) != CAN_NOMSG)
-  {  
+  // while (CAN0.readMsgBuf(&rxId, &len, rxBuf) != CAN_NOMSG)
+  // {  
     volatile const uint8_t msgId = (msgCount) % RX_MSG_BUFFER_LEN;
     msgBuffer[msgId][0] = (byte)(rxId >> 8);
     msgBuffer[msgId][1] = (byte)rxId;
@@ -64,6 +66,11 @@ void IRAM_ATTR put_message_in_buffer(void *arg) {
     std::copy(rxBuf, rxBuf + 8, msgBuffer[msgId] + 3);
     msgBuffer[msgId][11] = 0x00;
     msgCount++;
+    
+    gpio_set_intr_type(CAN0_INT_PIN, GPIO_INTR_LOW_LEVEL);
+  }
+  else {
+    gpio_set_intr_type(CAN0_INT_PIN, GPIO_INTR_NEGEDGE);
   }
 }
 

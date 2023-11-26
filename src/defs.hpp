@@ -5,16 +5,16 @@
 
 #define VERBOSE 1
 
-#define FL_ID 53
+#define FL_ID 53 // 0x35
 #define FL_MAX_CURRENT 60
 #define FL_MAX_BRAKE_CURRENT 75
-#define FR_ID 77
+#define FR_ID 77 // 0x4D
 #define FR_MAX_CURRENT 60
 #define FR_MAX_BRAKE_CURRENT 75
-#define RL_ID 13
+#define RL_ID 13 // 0x0D
 #define RL_MAX_CURRENT 90
 #define RL_MAX_BRAKE_CURRENT 90
-#define RR_ID 40
+#define RR_ID 40 // 0x28
 #define RR_MAX_CURRENT 90
 #define RR_MAX_BRAKE_CURRENT 90
 

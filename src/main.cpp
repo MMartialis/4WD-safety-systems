@@ -37,7 +37,6 @@
 // global variables
 
 extern char msgBuffer[RX_MSG_BUFFER_LEN][12];
-extern volatile double lastPwmRead;
 extern MCP_CAN CAN0;
 extern BluetoothSerial SerialBt;
 
@@ -50,9 +49,7 @@ float currentFR = 0;
 float currentRL = 0;
 float currentRR = 0;
 
-extern unsigned long interrupt_beggining;
-extern unsigned long interrupt_middle;
-extern unsigned long interrupt_end;
+float pwm = 0;
 
 //---------------------------------------------------------------------------------------------
 
@@ -85,29 +82,6 @@ void setup() {
   //*******************************************************************************************
   // Bluetooth setup
   bt_setup();
-
-  //*******************************************************************************************
-  // SD setup
-  // see if the card is present and can be initialized:
-
-
-  // Initialize SD card
-  // if (VERBOSE)
-  //   Serial.print("Initializing SD card...");
-  // if (!SD.begin(SD_CS_PIN)) {
-  //   Serial.println("Card failed, or not present");
-  //   while (1)
-  //     ; // don't do anything more
-  // }
-  // // if (VERBOSE)
-  // //   Serial.println("card initialized");
-  // // resetting undefined value floats to 0.00 for SD logging
-  // SD.open(findDataLogFileName(), FILE_WRITE);
-  // if (VERBOSE)
-  //   Serial.println("log file created");
-  // FillLogWithZeros();
-
-  // delay(100); 
 
   //*******************************************************************************************
   // Init MCP2515
@@ -146,16 +120,18 @@ void loop() {
     bt_cmd(SerialBt.readStringUntil('\n'));
   }
 
-  if (lastPwmRead >= 0) {
-    currentFL = lastPwmRead * FR_MAX_CURRENT;
-    currentFR = lastPwmRead * FR_MAX_CURRENT;
-    currentRL = lastPwmRead * FR_MAX_CURRENT;
-    currentRR = lastPwmRead * FR_MAX_CURRENT;
+  pwm = get_pwm();
+
+  if (pwm >= 0) {
+    currentFL = pwm * FR_MAX_CURRENT;
+    currentFR = pwm * FR_MAX_CURRENT;
+    currentRL = pwm * FR_MAX_CURRENT;
+    currentRR = pwm * FR_MAX_CURRENT;
   } else {
-    currentFL = lastPwmRead * FR_MAX_BRAKE_CURRENT;
-    currentFR = lastPwmRead * FR_MAX_BRAKE_CURRENT;
-    currentRL = lastPwmRead * FR_MAX_BRAKE_CURRENT;
-    currentRR = lastPwmRead * FR_MAX_BRAKE_CURRENT;
+    currentFL = pwm * FR_MAX_BRAKE_CURRENT;
+    currentFR = pwm * FR_MAX_BRAKE_CURRENT;
+    currentRL = pwm * FR_MAX_BRAKE_CURRENT;
+    currentRR = pwm * FR_MAX_BRAKE_CURRENT;
   }
   /*
    * if csúsz, apply minimum deterration to current
@@ -164,20 +140,18 @@ void loop() {
 
 
   // gpio_isr_handler_remove(CAN0_INT_PIN);
-  gpio_set_intr_type(CAN0_INT_PIN, GPIO_INTR_DISABLE);
-
+  // gpio_set_intr_type(CAN0_INT_PIN, GPIO_INTR_DISABLE);
+  gpio_intr_disable(CAN0_INT_PIN);
   comm_can_set_current(FL_ID, currentFL);
   comm_can_set_current(FR_ID, currentFR);
   comm_can_set_current(RL_ID, currentRL);
   comm_can_set_current(RR_ID, currentRR);
-  // can_setup_gpio_interrupt();
-  gpio_set_intr_type(CAN0_INT_PIN, GPIO_INTR_NEGEDGE);
   put_message_in_buffer(NULL);
   if (VERBOSE)
     Serial.println("current set");
   
   update_esc_status_control();
-  bt_log("PWM: ", lastPwmRead, " FL erpm: ", vescFL.erpm, "\n");
+  bt_log("PWM: ", pwm, " FL erpm: ", vescFL.erpm, "\n");
   // LogAppendValues();
   // if (VERBOSE)
   //   Serial.println("values logged");

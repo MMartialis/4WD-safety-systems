@@ -5,7 +5,7 @@
 BluetoothSerial SerialBt;
 
 bool en_pwm = true; // PWM read enabled or not
-extern double lastPwmRead;
+extern double pwm;
 // extern TaskHandle_t Handler1;
 
 // a list of words meaning enable/on
@@ -76,7 +76,7 @@ void pwm_enable(bool enable) { // set emulated pwm value, Warning: THIS WILL
     bt_log("Remote enabled");
   } else {
     en_pwm = false;
-    lastPwmRead = 0;
+    pwm = 0;
     bt_log("Remote disabled");
   }
 }
