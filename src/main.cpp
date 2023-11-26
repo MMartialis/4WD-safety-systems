@@ -54,18 +54,7 @@ float pwm = 0;
 //---------------------------------------------------------------------------------------------
 
 void setup() {
-// TIMERG1.wdt_wprotect = TIMG_WDT_WKEY_VALUE; // Unlock timer config.
-// TIMERG1.wdt_feed = 1; // Reset feed count.
-// TIMERG1.wdt_config0.en = 0; // Disable timer.
-// TIMERG1.wdt_wprotect = 0; // Lock timer config.
-
-// TIMERG0.wdt_wprotect = TIMG_WDT_WKEY_VALUE;
-// TIMERG0.wdt_feed = 1;
-// TIMERG0.wdt_config0.en = 0;
-// TIMERG0.wdt_wprotect = 0;
   Serial.begin(115200);
-  // rtc_wdt_protect_off();
-  // rtc_wdt_disable();
   gpio_install_isr_service(0); // Install the driver's GPIO ISR handler service
 
   //*******************************************************************************************
@@ -142,6 +131,7 @@ void loop() {
   // gpio_isr_handler_remove(CAN0_INT_PIN);
   // gpio_set_intr_type(CAN0_INT_PIN, GPIO_INTR_DISABLE);
   gpio_intr_disable(CAN0_INT_PIN);
+
   comm_can_set_current(FL_ID, currentFL);
   comm_can_set_current(FR_ID, currentFR);
   comm_can_set_current(RL_ID, currentRL);

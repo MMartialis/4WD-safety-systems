@@ -5,12 +5,12 @@
 
 extern bool en_pwm; // PWM read enabled or not
 
-volatile bool pwm_was_not_zero = false;
+volatile uint8_t pwm_was_not_zero = 0;
 
 volatile int16_t pwm_value = 0;
 
-intr_handle_t
-    handle; // Declare the handle variable globally or in an appropriate scope
+intr_handle_t handlePWM; // Declare the handle variable globally or in an
+                         // appropriate scope
 
 const float pwm_multiplier_pos = pow(
     (PWM_MAX_INTERVAL_MICROS - PWM_MEDIAN_INTERVAL_MICROS + PWM_DEADZONE), -1);
@@ -35,8 +35,8 @@ void pwm_setup_gpio_interrupt() {
   gpio_isr_handler_add(PWM_PIN_PIN, pwm_interrupt,
                        NULL); // Attach the handler to the GPIO pin
 
-  // esp_intr_alloc(GPIO_INTR_ANYEDGE, ESP_INTR_FLAG_LEVEL1, &pwm_interrupt,
-  // NULL, &handle);
+  // esp_intr_alloc(GPIO_INTR_ANYEDGE, ESP_INTR_FLAG_LEVEL2, &pwm_interrupt,
+  // NULL, &handlePWM);
 }
 
 void IRAM_ATTR pwm_interrupt(void *arg) {
@@ -78,17 +78,23 @@ void IRAM_ATTR pwm_interrupt(void *arg) {
   // }
   // last_time = time;
 }
-
 float get_pwm() {
   if (VERBOSE)
     Serial.println("PWM read: " + String(pwm_value) + " microseconds");
+
   if (abs(pwm_value) < PWM_DEADZONE) {
+    pwm_was_not_zero = 0;
     return 0;
   } else {
-    if (pwm_value > 0) {
-      return float(pwm_value - PWM_DEADZONE) * pwm_multiplier_pos;
+    if (pwm_was_not_zero>2) {
+      if (pwm_value > 0) {
+        return float(pwm_value - PWM_DEADZONE) * pwm_multiplier_pos;
+      } else {
+        return float(pwm_value + PWM_DEADZONE) * pwm_multiplier_neg;
+      }
     } else {
-      return float(pwm_value + PWM_DEADZONE) * pwm_multiplier_neg;
+      pwm_was_not_zero++;
+      return 0;
     }
   }
 }

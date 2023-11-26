@@ -15,6 +15,10 @@ long unsigned int rxId;
 uint8_t len = 0;
 uint8_t rxBuf[8];
 
+
+intr_handle_t
+    handleCAN; // Declare the handle variable globally or in an appropriate scope
+
 volatile char msgBuffer[RX_MSG_BUFFER_LEN][12];
 
 void can_configure_gpio_interrupt() {
@@ -31,6 +35,10 @@ void can_configure_gpio_interrupt() {
 void can_setup_gpio_interrupt() {
   gpio_isr_handler_add(CAN0_INT_PIN, put_message_in_buffer,
                        NULL); // Attach the handler to the GPIO pin
+
+                       
+  // esp_intr_alloc(GPIO_INTR_NEGEDGE, ESP_INTR_FLAG_LEVEL1, &put_message_in_buffer,
+  // NULL, &handleCAN);
 }
 
 void core_0_setup(void *params) {
