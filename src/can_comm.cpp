@@ -17,12 +17,6 @@ uint8_t rxBuf[8];
 
 volatile char msgBuffer[RX_MSG_BUFFER_LEN][12];
 
-unsigned long interrupt_beggining = micros();
-
-unsigned long interrupt_middle = micros();
-
-unsigned long interrupt_end = micros();
-
 void can_configure_gpio_interrupt() {
   gpio_config_t io_conf;
   io_conf.intr_type =
@@ -63,10 +57,12 @@ void IRAM_ATTR put_message_in_buffer(void *arg) {
     msgBuffer[msgId][0] = (byte)(rxId >> 8);
     msgBuffer[msgId][1] = (byte)rxId;
     msgBuffer[msgId][2] = (byte)len;
-    std::copy(rxBuf, rxBuf + 8, msgBuffer[msgId] + 3);
+    for (int i = 0; i < 8; ++i) {
+      msgBuffer[msgId][i + 3] = rxBuf[i];
+    }
     msgBuffer[msgId][11] = 0x00;
     msgCount++;
-    
+
     gpio_set_intr_type(CAN0_INT_PIN, GPIO_INTR_LOW_LEVEL);
   }
   else {

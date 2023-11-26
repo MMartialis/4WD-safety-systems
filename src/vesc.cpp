@@ -29,102 +29,186 @@ esc vescFL, vescFR, vescRL, vescRR;
 void update_esc_status_control() { // updates the esc status variables for
                                    // control funcs.
   byte esc_stat = 0; // byte to store whether the escs are updated or not
-  uint8_t msgId = (msgCount - 1) % RX_MSG_BUFFER_LEN;
-  uint8_t count = 0;
-  while (esc_stat != 0x0f && count < RX_MSG_BUFFER_LEN) {
+  uint8_t msgId = (msgCount - 1) % RX_MSG_BUFFER_LEN; 
+  // uint8_t count = 0; // number of messages processed, stops after RX_MSG_BUFFER_LEN
+
+  //--------------------------------------------------------------------------------
+  // Marci - Roli, de csak ha működik
+  //--------------------------------------------------------------------------------
+
+  for (uint8_t i = 0; i < RX_MSG_BUFFER_LEN && esc_stat != 0x0f /*all esc updated*/; i++) // main loop, until everything is updated
+  {
     if (VERBOSE) {
-      // print processed message
-      Serial.print("CAN RX: ");
-      for (int i = 0; i < 12; i++) {
-        Serial.print(msgBuffer[msgId][i], HEX);
-        Serial.print(" ");
-      }
-      // print esc_stat bit by bit
-      for (int i = 3; i >= 0; i--) {
-        Serial.print((esc_stat >> i) & 0x01, BIN);
-      }
-      Serial.print(" ");
+      // print can message
+      Serial.printf("CAN RX: msgId: %d com: %.2X id: %d len: %d data: %.2X %.2X %.2X %.2X %.2X %.2X %.2X %.2X:", msgId,
+        msgBuffer[msgId][0], msgBuffer[msgId][1], msgBuffer[msgId][2], msgBuffer[msgId][3], msgBuffer[msgId][4], msgBuffer[msgId][5], msgBuffer[msgId][6], msgBuffer[msgId][7], msgBuffer[msgId][8], msgBuffer[msgId][9], msgBuffer[msgId][10]);
     }
+    // verifying command id
     if (msgBuffer[msgId][0] != 0x09) {
-      if (VERBOSE) {
-        Serial.println("not staus 1");
-      }
+      if (VERBOSE) Serial.printf("invalid command id %d \n", msgBuffer[msgId][0]);
       msgId--;
       if (msgId > RX_MSG_BUFFER_LEN - 1) {
         msgId = RX_MSG_BUFFER_LEN - 1;
       }
-      count++;
-      continue;
-    }
-    if (msgBuffer[msgId][12] == 1) { // if the message is a read message
-      if (VERBOSE) {
-        Serial.println("already read message");
-      }
-      switch (msgBuffer[msgId][1]) {
-      case FL_ID:
-        esc_stat |= 0b00000001;
-        break;
-      case FR_ID:
-        esc_stat |= 0b00000010;
-        break;
-      case RL_ID:
-        esc_stat |= 0b00000100;
-        break;
-      case RR_ID:
-        esc_stat |= 0b00001000;
-        break;
-      default:
-        break;
-      }
-      msgId--;
-      if (msgId > RX_MSG_BUFFER_LEN - 1) {
-        msgId = RX_MSG_BUFFER_LEN - 1;
-      }
-      count++;
       continue;
     }
 
     esc *myMotor;
+    
+    // verify esc canbus id
     switch (msgBuffer[msgId][1]) {
     case FL_ID:
+      esc_stat |= 0b00000001;
       myMotor = &vescFL;
-      esc_stat = esc_stat | 0b00000001;
       break;
     case FR_ID:
+      esc_stat |= 0b00000010;
       myMotor = &vescFR;
-      esc_stat = esc_stat | 0b00000010;
       break;
     case RL_ID:
+      esc_stat |= 0b00000100;
       myMotor = &vescRL;
-      esc_stat = esc_stat | 0b00000100;
       break;
     case RR_ID:
+      esc_stat |= 0b00001000;
       myMotor = &vescRR;
-      esc_stat = esc_stat | 0b00001000;
       break;
-    default:
+    default: // if the esc id is not valid, skip the message
+      if (VERBOSE) Serial.println("invalid esc id");
+      msgId--;
+      if (msgId > RX_MSG_BUFFER_LEN - 1) {
+        msgId = RX_MSG_BUFFER_LEN - 1;
+      }
+      continue;
+    }
+
+    // if the message is a read message, skip it
+    if (msgBuffer[msgId][11]) {
+      if (VERBOSE) Serial.println("already read message");
+      // msgId--;
+      // if (msgId > RX_MSG_BUFFER_LEN - 1) {
+      //   msgId = RX_MSG_BUFFER_LEN - 1;
+      // }
+      // continue;
       break;
     }
-    msgBuffer[msgId][12] = 1; // set the message to read
+
+    // if not read message, update the esc status variables
+    msgBuffer[msgId][11] = 1; // set the message to read
     (*myMotor).erpm = (msgBuffer[msgId][3] << 24) |
                       (msgBuffer[msgId][4] << 16) | (msgBuffer[msgId][5] << 8) |
                       (msgBuffer[msgId][6]);
 
     (*myMotor).current =
         float(((msgBuffer[msgId][7] << 8) | (msgBuffer[msgId][8])) / 10.0);
+    
+    // go to the previous message
     msgId--;
+    
+    // if msgId is out of bounds, set it to the last element
     if (msgId > RX_MSG_BUFFER_LEN - 1) {
       msgId = RX_MSG_BUFFER_LEN - 1;
     }
-    count++;
-
-    if (VERBOSE) {
-      Serial.print("current: ");
-      Serial.print((*myMotor).current);
-      Serial.print(" erpm: ");
-      Serial.println((*myMotor).erpm);
-    }
+    if(VERBOSE) Serial.println("SUCCESS");
   }
+  
+  //--------------------------------------------------------------------------------
+  // BABA BABA BABA BABA BABA BABA BABA BABA BABA BABA BABA BABA BABA BABA BABA BABA
+  //--------------------------------------------------------------------------------
+  // while (esc_stat != 0x0f && count < RX_MSG_BUFFER_LEN) {
+  //   if (VERBOSE) {
+  //     // print processed message
+  //     Serial.print("CAN RX: ");
+  //     for (int i = 0; i < 12; i++) {
+  //       Serial.print(msgBuffer[msgId][i], HEX);
+  //       Serial.print(" ");
+  //     }
+  //     // print esc_stat bit by bit
+  //     for (int i = 3; i >= 0; i--) {
+  //       Serial.print((esc_stat >> i) & 0x01, BIN);
+  //     }
+  //     Serial.print(" ");
+  //   }
+  //   if (msgBuffer[msgId][0] != 0x09) {
+  //     if (VERBOSE) {
+  //       Serial.println("not staus 1");
+  //     }
+  //     msgId--;
+  //     if (msgId > RX_MSG_BUFFER_LEN - 1) {
+  //       msgId = RX_MSG_BUFFER_LEN - 1;
+  //     }
+  //     count++;
+  //     continue;
+  //   }
+  //   if (msgBuffer[msgId][12] == 1) { // if the message is a read message
+  //     if (VERBOSE) {
+  //       Serial.println("already read message");
+  //     }
+  //     switch (msgBuffer[msgId][1]) {
+  //     case FL_ID:
+  //       esc_stat |= 0b00000001;
+  //       break;
+  //     case FR_ID:
+  //       esc_stat |= 0b00000010;
+  //       break;
+  //     case RL_ID:
+  //       esc_stat |= 0b00000100;
+  //       break;
+  //     case RR_ID:
+  //       esc_stat |= 0b00001000;
+  //       break;
+  //     default:
+  //       break;
+  //     }
+  //     msgId--;
+  //     if (msgId > RX_MSG_BUFFER_LEN - 1) {
+  //       msgId = RX_MSG_BUFFER_LEN - 1;
+  //     }
+  //     count++;
+  //     continue;
+  //   }
+  //
+  //   esc *myMotor;
+  //   switch (msgBuffer[msgId][1]) {
+  //   case FL_ID:
+  //     myMotor = &vescFL;
+  //     esc_stat = esc_stat | 0b00000001;
+  //     break;
+  //   case FR_ID:
+  //     myMotor = &vescFR;
+  //     esc_stat = esc_stat | 0b00000010;
+  //     break;
+  //   case RL_ID:
+  //     myMotor = &vescRL;
+  //     esc_stat = esc_stat | 0b00000100;
+  //     break;
+  //   case RR_ID:
+  //     myMotor = &vescRR;
+  //     esc_stat = esc_stat | 0b00001000;
+  //     break;
+  //   default:
+  //     break;
+  //   }
+  //   msgBuffer[msgId][12] = 1; // set the message to read
+  //   (*myMotor).erpm = (msgBuffer[msgId][3] << 24) |
+  //                     (msgBuffer[msgId][4] << 16) | (msgBuffer[msgId][5] << 8) |
+  //                     (msgBuffer[msgId][6]);
+  //
+  //   (*myMotor).current =
+  //       float(((msgBuffer[msgId][7] << 8) | (msgBuffer[msgId][8])) / 10.0);
+  //   msgId--;
+  //   if (msgId > RX_MSG_BUFFER_LEN - 1) {
+  //     msgId = RX_MSG_BUFFER_LEN - 1;
+  //   }
+  //   count++;
+ //
+  //   if (VERBOSE) {
+  //     Serial.print("current: ");
+  //     Serial.print((*myMotor).current);
+  //     Serial.print(" erpm: ");
+  //     Serial.println((*myMotor).erpm);
+  //   }
+  // }
 }
 
 //   ezek nem jok >>  if [0] == 16 command id, [1] rx id, [2-3] fet temp*10,

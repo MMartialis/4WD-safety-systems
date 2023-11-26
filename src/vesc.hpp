@@ -18,6 +18,6 @@ struct esc
 
 // void print_raw_can_data(void* params);
 
-void update_esc_status_control(void);
+void update_esc_status_control();
 
-void update_esc_status_log(void);
+void update_esc_status_log();

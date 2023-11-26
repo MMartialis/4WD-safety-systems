@@ -146,9 +146,10 @@ void loop() {
   comm_can_set_current(FR_ID, currentFR);
   comm_can_set_current(RL_ID, currentRL);
   comm_can_set_current(RR_ID, currentRR);
-  put_message_in_buffer(NULL);
-  if (VERBOSE)
-    Serial.println("current set");
+  gpio_intr_enable(CAN0_INT_PIN);
+  // put_message_in_buffer(NULL);
+  // if (VERBOSE)
+  //   Serial.println("current set");
   
   update_esc_status_control();
   bt_log("PWM: ", pwm, " FL erpm: ", vescFL.erpm, "\n");
@@ -158,4 +159,5 @@ void loop() {
   // saveDataLog();
   // if (VERBOSE)
   //   Serial.println("log saved");
+  delayMicroseconds(MAIN_LOOP_DELAY_TICKS);
 }

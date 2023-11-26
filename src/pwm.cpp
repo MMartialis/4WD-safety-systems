@@ -9,7 +9,8 @@ volatile bool pwm_was_not_zero = false;
 
 volatile int16_t pwm_value = 0;
 
-intr_handle_t handle; // Declare the handle variable globally or in an appropriate scope
+intr_handle_t
+    handle; // Declare the handle variable globally or in an appropriate scope
 
 const float pwm_multiplier_pos = pow(
     (PWM_MAX_INTERVAL_MICROS - PWM_MEDIAN_INTERVAL_MICROS + PWM_DEADZONE), -1);
@@ -31,9 +32,11 @@ void pwm_configure_gpio_interrupt() {
 }
 
 void pwm_setup_gpio_interrupt() {
-  gpio_isr_handler_add(PWM_PIN_PIN, pwm_interrupt, NULL); // Attach the handler to the GPIO pin
-                       
-// esp_intr_alloc(GPIO_INTR_ANYEDGE, ESP_INTR_FLAG_LEVEL1, &pwm_interrupt, NULL, &handle);
+  gpio_isr_handler_add(PWM_PIN_PIN, pwm_interrupt,
+                       NULL); // Attach the handler to the GPIO pin
+
+  // esp_intr_alloc(GPIO_INTR_ANYEDGE, ESP_INTR_FLAG_LEVEL1, &pwm_interrupt,
+  // NULL, &handle);
 }
 
 void IRAM_ATTR pwm_interrupt(void *arg) {
@@ -44,6 +47,10 @@ void IRAM_ATTR pwm_interrupt(void *arg) {
   }
   pwm_value = time - last_time - PWM_MEDIAN_INTERVAL_MICROS;
   last_time = time;
+
+  //---------------------------------------------------------------------------------------------
+  // pwm old version
+  //---------------------------------------------------------------------------------------------
   // if (RTCWDT_TIMEOUT_REG == 0) {
   //   RTCWDT_TIMEOUT_REG = 0x50F0D0; // 5 seconds
   // }
