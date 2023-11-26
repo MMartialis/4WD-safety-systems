@@ -4,8 +4,6 @@
 
 #include "defs.hpp"
 
-extern double lastPwmRead;
-
 void pwm_configure_gpio_interrupt();
 
 void pwm_setup_gpio_interrupt();

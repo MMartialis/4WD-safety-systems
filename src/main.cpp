@@ -37,7 +37,7 @@
 // global variables
 
 extern char msgBuffer[RX_MSG_BUFFER_LEN][12];
-extern double lastPwmRead;
+extern volatile double lastPwmRead;
 extern MCP_CAN CAN0;
 extern BluetoothSerial SerialBt;
 

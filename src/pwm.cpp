@@ -10,7 +10,7 @@ volatile bool pwm_was_not_zero = false;
 const float pwm_multiplier_pos =
     pow((PWM_MAX_INTERVAL_MICROS - PWM_MEDIAN_INTERVAL_MICROS + PWM_DEADZONE), -1);
 const float pwm_multiplier_neg =
-    pow((PWM_MEDIAN_INTERVAL_MICROS - PWM_MIN_INTERVAL_MICROS - PWM_DEADZONE), -1);
+    pow((PWM_MEDIAN_INTERVAL_MICROS - PWM_DEADZONE - PWM_MIN_INTERVAL_MICROS ), -1);
 
 unsigned long last_time = micros();
 volatile double lastPwmRead = 0; // the global variable that stores the last pwm read
@@ -47,9 +47,9 @@ void IRAM_ATTR pwm_interrupt(void* arg) {
     }
     else if (pwm_was_not_zero){
       if (number > 0) {
-        lastPwmRead = double(number) * pwm_multiplier_pos;
+        lastPwmRead = double(number - PWM_DEADZONE) * pwm_multiplier_pos;
       } else {
-        lastPwmRead = double(number) * pwm_multiplier_neg;
+        lastPwmRead = double(number + PWM_DEADZONE) * pwm_multiplier_neg;
       }
     } else {
       pwm_was_not_zero = true;
