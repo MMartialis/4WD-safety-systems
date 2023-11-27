@@ -1,8 +1,8 @@
 // can_comm.cpp
 
 #include "can_comm.hpp"
-#include "driver/gpio.h"
 #include "bt.hpp"
+#include "driver/gpio.h"
 #include "vesc.hpp"
 
 #include "soc/rtc_wdt.h"
@@ -11,7 +11,6 @@
 extern float pwm;
 extern esc vescFL, vescFR, vescRL, vescRR;
 extern float currentFL, currentFR, currentRL, currentRR;
-
 
 extern TaskHandle_t Handler0;
 extern bool SD_ACTIVE;
@@ -23,16 +22,14 @@ long unsigned int rxId;
 uint8_t len = 0;
 uint8_t rxBuf[8];
 
-
-intr_handle_t
-    handleCAN; // Declare the handle variable globally or in an appropriate scope
+intr_handle_t handleCAN; // Declare the handle variable globally or in an
+                         // appropriate scope
 
 volatile char msgBuffer[RX_MSG_BUFFER_LEN][12];
 
 void can_configure_gpio_interrupt() {
   gpio_config_t io_conf;
-  io_conf.intr_type =
-      GPIO_INTR_NEGEDGE; // Interrupt on rising or falling edge
+  io_conf.intr_type = GPIO_INTR_NEGEDGE; // Interrupt on rising or falling edge
   io_conf.pin_bit_mask = (1ULL << CAN0_INT_PIN); // Bitmask for the pin
   io_conf.mode = GPIO_MODE_INPUT;                // Set as input mode
   io_conf.pull_up_en = GPIO_PULLUP_DISABLE;      // Disable pull-up
@@ -44,9 +41,8 @@ void can_setup_gpio_interrupt() {
   gpio_isr_handler_add(CAN0_INT_PIN, put_message_in_buffer,
                        NULL); // Attach the handler to the GPIO pin
 
-                       
-  // esp_intr_alloc(GPIO_INTR_NEGEDGE, ESP_INTR_FLAG_LEVEL1, &put_message_in_buffer,
-  // NULL, &handleCAN);
+  // esp_intr_alloc(GPIO_INTR_NEGEDGE, ESP_INTR_FLAG_LEVEL1,
+  // &put_message_in_buffer, NULL, &handleCAN);
 }
 
 void core_0_setup(void *params) {
@@ -57,22 +53,20 @@ void core_0_setup(void *params) {
 
   // put_message_in_buffer(NULL);
 
-  #ifdef VERBOSE
-    Serial.println("CAN0 interrupt attached");
-  #endif
+#ifdef VERBOSE
+  Serial.println("CAN0 interrupt attached");
+#endif
   // while(1){
   // }
   vTaskDelete(Handler0);
 }
 
-
-
 void IRAM_ATTR put_message_in_buffer(void *arg) {
   if (CAN0.readMsgBuf(&rxId, &len, rxBuf) != CAN_NOMSG) {
     // return;
-  // }
-  // while (CAN0.readMsgBuf(&rxId, &len, rxBuf) != CAN_NOMSG)
-  // {  
+    // }
+    // while (CAN0.readMsgBuf(&rxId, &len, rxBuf) != CAN_NOMSG)
+    // {
     volatile const uint8_t msgId = (msgCount) % RX_MSG_BUFFER_LEN;
     msgBuffer[msgId][0] = (byte)(rxId >> 8);
     msgBuffer[msgId][1] = (byte)rxId;
@@ -84,8 +78,7 @@ void IRAM_ATTR put_message_in_buffer(void *arg) {
     msgCount++;
 
     gpio_set_intr_type(CAN0_INT_PIN, GPIO_INTR_LOW_LEVEL);
-  }
-  else {
+  } else {
     gpio_set_intr_type(CAN0_INT_PIN, GPIO_INTR_NEGEDGE);
   }
 }
@@ -112,18 +105,17 @@ void can_transmit_eid(uint32_t id, const uint8_t *data, uint8_t len,
                       uint8_t rtr) {
   CAN0.sendMsgBuf((unsigned long)id, (byte)1, (byte)rtr, (byte)len,
                   (byte *)data);
-  #ifdef VERBOSE
-    // Serial.print("CAN message sent");
-    Serial.print(" txID: ");
-    Serial.print(id, HEX);
-    Serial.print(" Data: ");
-    for (int i = 0; i < len; i++) {
-      Serial.print(data[i], HEX);
-      Serial.print(" ");
-    }
-    Serial.println();
-  #endif
+#ifdef VERBOSE
+  // Serial.print("CAN message sent");
+  Serial.print(" txID: ");
+  Serial.print(id, HEX);
+  Serial.print(" Data: ");
+  for (int i = 0; i < len; i++) {
+    Serial.print(data[i], HEX);
+    Serial.print(" ");
   }
+  Serial.println();
+#endif
 }
 
 void buffer_append_int16(uint8_t *buffer, int16_t number, int32_t *index) {
