@@ -29,23 +29,33 @@ esc vescFL, vescFR, vescRL, vescRR;
 void update_esc_status_control() { // updates the esc status variables for
                                    // control funcs.
   byte esc_stat = 0; // byte to store whether the escs are updated or not
-  uint8_t msgId = (uint8_t) (msgCount - 1) % RX_MSG_BUFFER_LEN; 
-  // uint8_t count = 0; // number of messages processed, stops after RX_MSG_BUFFER_LEN
+  uint8_t msgId = (uint8_t)(msgCount - 1) % RX_MSG_BUFFER_LEN;
+  // uint8_t count = 0; // number of messages processed, stops after
+  // RX_MSG_BUFFER_LEN
 
   //--------------------------------------------------------------------------------
   // Marci - Roli, de csak ha működik
   //--------------------------------------------------------------------------------
 
-  for (uint8_t i = 0; i < RX_MSG_BUFFER_LEN && esc_stat != 0x0f /*all esc updated*/; i++) // main loop, until everything is updated
+  for (uint8_t i = 0;
+       i < RX_MSG_BUFFER_LEN && esc_stat != 0x0f /*all esc updated*/;
+       i++) // main loop, until everything is updated
   {
-    if (VERBOSE) {
-      // print can message
-      Serial.printf("msgId: %d, CAN RX: com: %.2X id: %d len: %d data: %.2X %.2X %.2X %.2X %.2X %.2X %.2X %.2X:", msgId,
-        msgBuffer[msgId][0], msgBuffer[msgId][1], msgBuffer[msgId][2], msgBuffer[msgId][3], msgBuffer[msgId][4], msgBuffer[msgId][5], msgBuffer[msgId][6], msgBuffer[msgId][7], msgBuffer[msgId][8], msgBuffer[msgId][9], msgBuffer[msgId][10]);
-    }
+#ifdef VERBOSE
+    // print can message
+    Serial.printf("msgId: %d, CAN RX: com: %.2X id: %d len: %d data: %.2X %.2X "
+                  "%.2X %.2X %.2X %.2X %.2X %.2X:",
+                  msgId, msgBuffer[msgId][0], msgBuffer[msgId][1],
+                  msgBuffer[msgId][2], msgBuffer[msgId][3], msgBuffer[msgId][4],
+                  msgBuffer[msgId][5], msgBuffer[msgId][6], msgBuffer[msgId][7],
+                  msgBuffer[msgId][8], msgBuffer[msgId][9],
+                  msgBuffer[msgId][10]);
+#endif
     // verifying command id
     if (msgBuffer[msgId][0] != 0x09) {
-      if (VERBOSE) Serial.printf("invalid command id %d \n", msgBuffer[msgId][0]);
+#ifdef VERBOSE
+      Serial.printf("invalid command id %d \n", msgBuffer[msgId][0]);
+#endif
       msgId--;
       if (msgId > RX_MSG_BUFFER_LEN - 1) {
         msgId = RX_MSG_BUFFER_LEN - 1;
@@ -54,7 +64,7 @@ void update_esc_status_control() { // updates the esc status variables for
     }
 
     esc *myMotor;
-    
+
     // verify esc canbus id
     switch (msgBuffer[msgId][1]) {
     case FL_ID:
@@ -74,7 +84,9 @@ void update_esc_status_control() { // updates the esc status variables for
       myMotor = &vescRR;
       break;
     default: // if the esc id is not valid, skip the message
-      if (VERBOSE) Serial.println("invalid esc id");
+#ifdef VERBOSE
+      Serial.println("invalid esc id");
+#endif
       msgId--;
       if (msgId > RX_MSG_BUFFER_LEN - 1) {
         msgId = RX_MSG_BUFFER_LEN - 1;
@@ -84,7 +96,9 @@ void update_esc_status_control() { // updates the esc status variables for
 
     // if the message is a read message, skip it
     if (msgBuffer[msgId][11]) {
-      if (VERBOSE) Serial.println("already read message");
+      #ifdef VERBOSE
+        Serial.println("already read message");
+      #endif
       // msgId--;
       // if (msgId > RX_MSG_BUFFER_LEN - 1) {
       //   msgId = RX_MSG_BUFFER_LEN - 1;
@@ -101,18 +115,20 @@ void update_esc_status_control() { // updates the esc status variables for
 
     (*myMotor).current =
         float(((msgBuffer[msgId][7] << 8) | (msgBuffer[msgId][8])) / 10.0);
-    
+
     // go to the previous message
     msgId--;
-    
+
     // if msgId is out of bounds, set it to the last element
     if (msgId > RX_MSG_BUFFER_LEN - 1) {
       msgId = RX_MSG_BUFFER_LEN - 1;
     }
-    if(VERBOSE) Serial.println("SUCCESS");
+    #ifdef VERBOSE
+      Serial.println("SUCCESS");
+    #endif
   }
 }
-  
+
 //   ezek nem jok >>  if [0] == 16 command id, [1] rx id, [2-3] fet temp*10,
 //   [4-5] motor temp*10, [6-7] current in*10, [8-9] pid pos*50],
 void update_esc_status_log() {

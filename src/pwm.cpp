@@ -79,8 +79,9 @@ void IRAM_ATTR pwm_interrupt(void *arg) {
   // last_time = time;
 }
 float get_pwm() {
-  if (VERBOSE)
+  #ifdef VERBOSE
     Serial.println("PWM read: " + String(pwm_value) + " microseconds");
+  #endif
 
   if (abs(pwm_value) < PWM_DEADZONE) {
     pwm_was_not_zero = 0;

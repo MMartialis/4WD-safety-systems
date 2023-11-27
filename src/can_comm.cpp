@@ -56,8 +56,10 @@ void core_0_setup(void *params) {
   can_configure_gpio_interrupt(); // Configure GPIO pin for interrupt
 
   // put_message_in_buffer(NULL);
-  if (VERBOSE)
+
+  #ifdef VERBOSE
     Serial.println("CAN0 interrupt attached");
+  #endif
   // while(1){
   // }
   vTaskDelete(Handler0);
@@ -110,7 +112,7 @@ void can_transmit_eid(uint32_t id, const uint8_t *data, uint8_t len,
                       uint8_t rtr) {
   CAN0.sendMsgBuf((unsigned long)id, (byte)1, (byte)rtr, (byte)len,
                   (byte *)data);
-  if (VERBOSE) {
+  #ifdef VERBOSE
     // Serial.print("CAN message sent");
     Serial.print(" txID: ");
     Serial.print(id, HEX);
@@ -120,6 +122,7 @@ void can_transmit_eid(uint32_t id, const uint8_t *data, uint8_t len,
       Serial.print(" ");
     }
     Serial.println();
+  #endif
   }
 }
 

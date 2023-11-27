@@ -57,7 +57,7 @@ float pwm = 0;
 void bt_log_csv(void *params){
   while(1){
     char log[100] = "";
-    sprintf(log, "%.2f,%.2d,%.2f,%.2f,%.2d,%.2f,%.2f,%.2d,%.2f,%.2f,%.2d,%.2f,%.2f\n", pwm,
+    sprintf(log, "%.2f, %.2d, %.2f, %.2f, %.2d, %.2f, %.2f, %.2d, %.2f, %.2f, %.2d, %.2f, %.2f\n", pwm,
     vescFL.erpm, vescFL.current, currentFL,
     vescFR.erpm, vescFR.current, currentFR,
     vescRL.erpm, vescRL.current, currentRL,
@@ -92,8 +92,9 @@ void setup() {
   pwm_setup_gpio_interrupt(); // Set up interrupt handler for GPIO pin
   pwm_configure_gpio_interrupt(); // Configure GPIO pin for interrupt
 
-  if (VERBOSE)
+  #ifdef VERBOSE
     Serial.println("PWM interrupt attached");
+  #endif
 
   //*******************************************************************************************
   // Bluetooth setup
@@ -111,19 +112,21 @@ void setup() {
   //*******************************************************************************************
   // Init MCP2515
     void mcp2515_reset(void); // Soft Reset MCP2515
-  if (VERBOSE)
+  #ifdef VERBOSE
     Serial.print("MCP2515 Initializing...");
+  #endif
     // CAN0.init_Mask(0, 1, 0xff00 & 0); // Init Mask
     // CAN0.init_Mask(1, 1, 0xff00 & 0); // Init Mask
     // CAN0.init_Filt(0, 1, (STATUS_1_COMMAND_ID << 8)); // Init Filter 0
     // CAN0.init_Filt(2, 1, (STATUS_1_COMMAND_ID << 8)); // Init Filter 1
   if (CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK) {
-    if (VERBOSE)
+  #ifdef VERBOSE
       Serial.println("MCP2515 Initialized Successfully!");
-
+  #endif
     CAN0.setMode(MCP_NORMAL);
-    if (VERBOSE)
+  #ifdef VERBOSE
       Serial.println("MCP2515 Normal Mode Activated!");
+  #endif
   } else {
       Serial.println("Error Initializing MCP2515, entering infinite loop");
     while (1)
@@ -180,18 +183,20 @@ void loop() {
   update_esc_status_control();
   gpio_intr_enable(CAN0_INT_PIN);
   // put_message_in_buffer(NULL);
-  // if (VERBOSE)
+  // #ifdef VERBOSE
   //   Serial.println("current set");
-  
+  // #endif
 
   
   
   
    // LogAppendValues();
-  // if (VERBOSE)
+  // #ifdef VERBOSE
   //   Serial.println("values logged");
+  // #endif
   // saveDataLog();
-  // if (VERBOSE)
+  // #ifdef VERBOSE
   //   Serial.println("log saved");
+  // #endif
   delayMicroseconds(MAIN_LOOP_DELAY_TICKS);
 }
