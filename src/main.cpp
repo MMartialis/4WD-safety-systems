@@ -92,7 +92,7 @@ void setup() {
   pwm_setup_gpio_interrupt(); // Set up interrupt handler for GPIO pin
   pwm_configure_gpio_interrupt(); // Configure GPIO pin for interrupt
 
-  #ifdef VERBOSE
+  #if VERBOSE
     Serial.println("PWM interrupt attached");
   #endif
 
@@ -112,7 +112,7 @@ void setup() {
   //*******************************************************************************************
   // Init MCP2515
     void mcp2515_reset(void); // Soft Reset MCP2515
-  #ifdef VERBOSE
+  #if VERBOSE
     Serial.print("MCP2515 Initializing...");
   #endif
     // CAN0.init_Mask(0, 1, 0xff00 & 0); // Init Mask
@@ -120,11 +120,11 @@ void setup() {
     // CAN0.init_Filt(0, 1, (STATUS_1_COMMAND_ID << 8)); // Init Filter 0
     // CAN0.init_Filt(2, 1, (STATUS_1_COMMAND_ID << 8)); // Init Filter 1
   if (CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK) {
-  #ifdef VERBOSE
+  #if VERBOSE
       Serial.println("MCP2515 Initialized Successfully!");
   #endif
     CAN0.setMode(MCP_NORMAL);
-  #ifdef VERBOSE
+  #if VERBOSE
       Serial.println("MCP2515 Normal Mode Activated!");
   #endif
   } else {
@@ -183,7 +183,7 @@ void loop() {
   update_esc_status_control();
   gpio_intr_enable(CAN0_INT_PIN);
   // put_message_in_buffer(NULL);
-  // #ifdef VERBOSE
+  // #if VERBOSE
   //   Serial.println("current set");
   // #endif
 
@@ -191,11 +191,11 @@ void loop() {
   
   
    // LogAppendValues();
-  // #ifdef VERBOSE
+  // #if VERBOSE
   //   Serial.println("values logged");
   // #endif
   // saveDataLog();
-  // #ifdef VERBOSE
+  // #if VERBOSE
   //   Serial.println("log saved");
   // #endif
   delayMicroseconds(MAIN_LOOP_DELAY_TICKS);

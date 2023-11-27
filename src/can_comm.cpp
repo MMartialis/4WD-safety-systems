@@ -53,7 +53,7 @@ void core_0_setup(void *params) {
 
   // put_message_in_buffer(NULL);
 
-#ifdef VERBOSE
+#if VERBOSE
   Serial.println("CAN0 interrupt attached");
 #endif
   // while(1){
@@ -105,7 +105,7 @@ void can_transmit_eid(uint32_t id, const uint8_t *data, uint8_t len,
                       uint8_t rtr) {
   CAN0.sendMsgBuf((unsigned long)id, (byte)1, (byte)rtr, (byte)len,
                   (byte *)data);
-#ifdef VERBOSE
+#if VERBOSE
   // Serial.print("CAN message sent");
   Serial.print(" txID: ");
   Serial.print(id, HEX);

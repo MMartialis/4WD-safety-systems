@@ -40,7 +40,7 @@ void bt_cmd(String cmd) {
 void bt_setup() {
   SerialBt.begin("esp_32_awd");
   bt_log("Bluetooth setup completed");
-  #ifdef VERBOSE
+  #if VERBOSE
     Serial.println("Bluetooth setup completed");
   #endif
   // vTaskDelete(Handler1);

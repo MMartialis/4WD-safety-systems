@@ -41,7 +41,7 @@ void update_esc_status_control() { // updates the esc status variables for
        i < RX_MSG_BUFFER_LEN && esc_stat != 0x0f /*all esc updated*/;
        i++) // main loop, until everything is updated
   {
-#ifdef VERBOSE
+#if VERBOSE
     // print can message
     Serial.printf("msgId: %d, CAN RX: com: %.2X id: %d len: %d data: %.2X %.2X "
                   "%.2X %.2X %.2X %.2X %.2X %.2X:",
@@ -53,7 +53,7 @@ void update_esc_status_control() { // updates the esc status variables for
 #endif
     // verifying command id
     if (msgBuffer[msgId][0] != 0x09) {
-#ifdef VERBOSE
+#if VERBOSE
       Serial.printf("invalid command id %d \n", msgBuffer[msgId][0]);
 #endif
       msgId--;
@@ -84,7 +84,7 @@ void update_esc_status_control() { // updates the esc status variables for
       myMotor = &vescRR;
       break;
     default: // if the esc id is not valid, skip the message
-#ifdef VERBOSE
+#if VERBOSE
       Serial.println("invalid esc id");
 #endif
       msgId--;
@@ -96,7 +96,7 @@ void update_esc_status_control() { // updates the esc status variables for
 
     // if the message is a read message, skip it
     if (msgBuffer[msgId][11]) {
-      #ifdef VERBOSE
+      #if VERBOSE
         Serial.println("already read message");
       #endif
       // msgId--;
@@ -123,7 +123,7 @@ void update_esc_status_control() { // updates the esc status variables for
     if (msgId > RX_MSG_BUFFER_LEN - 1) {
       msgId = RX_MSG_BUFFER_LEN - 1;
     }
-    #ifdef VERBOSE
+    #if VERBOSE
       Serial.println("SUCCESS");
     #endif
   }
