@@ -34,7 +34,7 @@
 #define PWM_PIN 2
 #define PWM_PIN_PIN GPIO_NUM_2
 #define PWM_MIN_INTERVAL_MICROS 1108
-#define PWM_MAX_INTERVAL_MICROS 1880
+#define PWM_MAX_INTERVAL_MICROS 1878
 #define PWM_MEDIAN_INTERVAL_MICROS 1498
 #define PWM_DEADZONE 25 // the deadzone for the pwm signal in microseconds
 #define PWM_WAS_NOT_ZERO_THRESHOLD 2
@@ -43,3 +43,4 @@
 #define SD_CS_PIN 17
 
 #endif
+

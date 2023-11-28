@@ -38,16 +38,10 @@ void can_configure_gpio_interrupt() {
 }
 
 void can_setup_gpio_interrupt() {
-  gpio_isr_handler_add(CAN0_INT_PIN, put_message_in_buffer,
-                       NULL); // Attach the handler to the GPIO pin
-
-  // esp_intr_alloc(GPIO_INTR_NEGEDGE, ESP_INTR_FLAG_LEVEL1,
-  // &put_message_in_buffer, NULL, &handleCAN);
+  gpio_isr_handler_add(CAN0_INT_PIN, put_message_in_buffer, NULL);
 }
 
 void core_0_setup(void *params) {
-  // attachInterrupt(digitalPinToInterrupt(CAN0_INT), put_message_in_buffer,
-  //                 FALLING);
   can_setup_gpio_interrupt();     // Set up interrupt handler for GPIO pin
   can_configure_gpio_interrupt(); // Configure GPIO pin for interrupt
 
