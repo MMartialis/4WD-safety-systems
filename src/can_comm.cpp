@@ -7,6 +7,9 @@
 
 #include "soc/rtc_wdt.h"
 
+
+uint activeCounter = 0;
+
 // loggign vars
 extern float pwm;
 extern esc vescFL, vescFR, vescRL, vescRR;
@@ -22,10 +25,13 @@ long unsigned int rxId;
 uint8_t len = 0;
 uint8_t rxBuf[8];
 
+TaskHandle_t HandlerCAN_0; 
+TaskHandle_t HandlerCAN_1;
+
 intr_handle_t handleCAN; // Declare the handle variable globally or in an
                          // appropriate scope
 
-volatile char msgBuffer[RX_MSG_BUFFER_LEN][12];
+char msgBuffer[RX_MSG_BUFFER_LEN][12];
 
 void can_configure_gpio_interrupt() {
   gpio_config_t io_conf;
@@ -38,22 +44,50 @@ void can_configure_gpio_interrupt() {
 }
 
 void can_setup_gpio_interrupt() {
-  gpio_isr_handler_add(CAN0_INT_PIN, put_message_in_buffer, NULL);
+  gpio_isr_handler_add(CAN0_INT_PIN, set_can_read_task, NULL);
 }
 
 void core_0_setup(void *params) {
   can_setup_gpio_interrupt();     // Set up interrupt handler for GPIO pin
   can_configure_gpio_interrupt(); // Configure GPIO pin for interrupt
-
-#if VERBOSE
-  Serial.println("CAN0 interrupt attached");
-#endif
-  // while(1){
-  // }
-  vTaskDelete(Handler0);
+  vTaskDelete(NULL);
 }
 
+void IRAM_ATTR set_can_read_task(void *arg) {
+  uint8_t coreId;
+  //set core to less busy core
+
+  TaskHandle_t myHandler;
+  if (activeCounter == 0) {
+    coreId = 0;
+    myHandler = HandlerCAN_0;
+  } else if (activeCounter == 1) {
+    coreId = 1;
+    myHandler = HandlerCAN_1;
+  } else {
+    return;
+  }
+
+  xTaskCreatePinnedToCore(&put_message_in_buffer, 
+    "CAN read task", 
+    1024, 
+    NULL, 
+    1,
+    &myHandler, 
+    1
+  );
+}
+
+// void this_is_needed(void *params) {
+//   vTaskDelete(NULL);
+// }
+
+// void this_is_needed2(void *params) {
+//   vTaskDelete(NULL);
+// }
+
 void IRAM_ATTR put_message_in_buffer(void *arg) {
+  activeCounter++;
   if (CAN0.readMsgBuf(&rxId, &len, rxBuf) != CAN_NOMSG) {
     // return;
     // }
@@ -73,6 +107,8 @@ void IRAM_ATTR put_message_in_buffer(void *arg) {
   } else {
     gpio_set_intr_type(CAN0_INT_PIN, GPIO_INTR_NEGEDGE);
   }
+  activeCounter--;
+  vTaskDelete(NULL);
 }
 
 // Implementation for sending extended ID CAN-frames

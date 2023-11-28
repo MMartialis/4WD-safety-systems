@@ -39,6 +39,8 @@
 extern char msgBuffer[RX_MSG_BUFFER_LEN][12];
 extern MCP_CAN CAN0;
 extern BluetoothSerial SerialBt;
+extern TaskHandle_t HandlerCAN_0;
+extern TaskHandle_t HandlerCAN_1;
 
 extern esc vescFL, vescFR, vescRL, vescRR;
 
@@ -63,7 +65,7 @@ void bt_log_csv(void *params){
     vescRL.erpm, vescRL.current,
     vescRR.erpm, vescRR.current);
     bt_log((String)log);
-    vTaskDelay(1 / portTICK_PERIOD_MS);
+    vTaskDelay(5);
   }
 }
 
@@ -71,17 +73,6 @@ void setup() {
   Serial.begin(115200);
   gpio_install_isr_service(0); // Install the driver's GPIO ISR handler service
 
-  //*******************************************************************************************
-  // PWM setup
-  // pinMode(PWM_PIN, INPUT); // pwm setup
-  // attachInterrupt(digitalPinToInterrupt(PWM_PIN), pwm_interrupt, CHANGE);
-
-  pwm_setup_gpio_interrupt(); // Set up interrupt handler for GPIO pin
-  pwm_configure_gpio_interrupt(); // Configure GPIO pin for interrupt
-
-  #if VERBOSE
-    Serial.println("PWM interrupt attached");
-  #endif
 
   //*******************************************************************************************
   // Bluetooth setup
@@ -93,14 +84,15 @@ void setup() {
     delay(100);
   }
 
-  xTaskCreatePinnedToCore(&bt_log_csv, /* Function to implement the task */
-                          "bt_log_csv",       /* Name of the task */
-                          3000,           /* Stack size in words */
-                          NULL,          /* Task input parameter */
-                          1,             /* Priority of the task */
-                          &HandlerBt,     /* Task handle. */
-                          0              /* Core where the task should run */
-  );
+  //*******************************************************************************************
+  // PWM setup
+
+  pwm_setup_gpio_interrupt(); // Set up interrupt handler for GPIO pin
+  pwm_configure_gpio_interrupt(); // Configure GPIO pin for interrupt
+
+  #if VERBOSE
+    Serial.println("PWM interrupt attached");
+  #endif
 
   //*******************************************************************************************
   // Init MCP2515
@@ -126,20 +118,70 @@ void setup() {
       ; // don't do anything more
   }
 
-  xTaskCreatePinnedToCore(&core_0_setup, /* Function to implement the task */
-                          "core_0_setup",       /* Name of the task */
+  //*******************************************************************************************
+  // CAN setup
+  //this is needed dont delete
+  // xTaskCreatePinnedToCore(&this_is_needed, /* Function to implement the task */
+  //                         "whyyyy",       /* Name of the task */
+  //                         1024,           /* Stack size in words */
+  //                         NULL,          /* Task input parameter */
+  //                         3,             /* Priority of the task */
+  //                         &HandlerCAN_0,     /* Task handle. */
+  //                         0              /* Core where the task should run */
+  // );
+  // delay(1000);
+
+  // xTaskCreatePinnedToCore(&this_is_needed2, /* Function to implement the task */
+  //                         "noooo",       /* Name of the task */
+  //                         1024,           /* Stack size in words */
+  //                         NULL,          /* Task input parameter */
+  //                         3,             /* Priority of the task */
+  //                         &HandlerCAN_1,     /* Task handle. */
+  //                         0              /* Core where the task should run */
+  );
+
+  delay(1000);
+
+  xTaskCreatePinnedToCore(&core_0_setup,  /* Function to implement the task */
+                          "core_0_setup", /* Name of the task */
+                          2048,           /* Stack size in words */
+                          NULL,           /* Task input parameter */
+                          2,              /* Priority of the task */
+                          &Handler0,      /* Task handle. */
+                          0               /* Core where the task should run */
+  );
+
+#if VERBOSE
+  Serial.println("CAN0 interrupt attached");
+#endif
+
+  //*******************************************************************************************
+  // start Bluetooth logging
+   xTaskCreatePinnedToCore(&bt_log_csv, /* Function to implement the task */
+                          "bt_log_csv",       /* Name of the task */
                           3000,           /* Stack size in words */
                           NULL,          /* Task input parameter */
                           1,             /* Priority of the task */
-                          &Handler0,     /* Task handle. */
+                          &HandlerBt,     /* Task handle. */
                           0              /* Core where the task should run */
   );
 
+#if VERBOSE
+  Serial.println("Bluetooth logging started");
+#endif
 
 }
 
 //---------------------------------------------------------------------------------------------
 void loop() {
+  // xTaskCreatePinnedToCore(&put_message_in_buffer, 
+  //   "CAN read task", 
+  //   3000, 
+  //   NULL, 
+  //   2,
+  //   &Handler0, 
+  //   0
+  // );
   //*******************************************************************************************
   // Bluetooth check
   if (SerialBt.available()) {

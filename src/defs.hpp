@@ -3,13 +3,13 @@
 #ifndef DEFS_HPP
 #define DEFS_HPP
 
-#define VERBOSE 0
-#define VERBOSE_PWM 1
+#define VERBOSE 1
+#define VERBOSE_PWM 0
 
 #define BT_LOG 1
-#define BT_LOG_TIMESTAMP 0
+#define BT_LOG_TIMESTAMP 1
 
-#define MAIN_LOOP_DELAY_US 20000 // microseconds
+#define MAIN_LOOP_DELAY_US 0 // microseconds
 #define MAIN_LOOP_DELAY_TICKS (MAIN_LOOP_DELAY * configTICK_RATE_HZ) / 1000000
 
 #define FL_ID 53 // 0x35
