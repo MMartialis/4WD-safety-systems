@@ -32,11 +32,7 @@ void pwm_configure_gpio_interrupt() {
 }
 
 void pwm_setup_gpio_interrupt() {
-  gpio_isr_handler_add(PWM_PIN_PIN, pwm_interrupt,
-                       NULL); // Attach the handler to the GPIO pin
-
-  // esp_intr_alloc(GPIO_INTR_ANYEDGE, ESP_INTR_FLAG_LEVEL2, &pwm_interrupt,
-  // NULL, &handlePWM);
+  gpio_isr_handler_add(PWM_PIN_PIN, pwm_interrupt, NULL);
 }
 
 void IRAM_ATTR pwm_interrupt(void *arg) {
@@ -47,8 +43,31 @@ void IRAM_ATTR pwm_interrupt(void *arg) {
   }
   pwm_value = time - last_time - PWM_MEDIAN_INTERVAL_MICROS;
   last_time = time;
+}
 
-  //---------------------------------------------------------------------------------------------
+float get_pwm() {
+  #if VERBOSE || VERBOSE_PWM
+    Serial.println("PWM read: " + String(pwm_value) + " microseconds");
+  #endif
+
+  if (abs(pwm_value) < PWM_DEADZONE) {
+    pwm_was_not_zero = 0;
+    return 0;
+  } else {
+    if (pwm_was_not_zero >= PWM_WAS_NOT_ZERO_THRESHOLD) {
+      if (pwm_value > 0) {
+        return float(pwm_value - PWM_DEADZONE) * pwm_multiplier_pos;
+      } else {
+        return float(pwm_value + PWM_DEADZONE) * pwm_multiplier_neg;
+      }
+    } else {
+      pwm_was_not_zero++;
+      return 0;
+    }
+  }
+}
+
+//---------------------------------------------------------------------------------------------
   // pwm old version
   //---------------------------------------------------------------------------------------------
   // if (RTCWDT_TIMEOUT_REG == 0) {
@@ -77,25 +96,3 @@ void IRAM_ATTR pwm_interrupt(void *arg) {
   //   }
   // }
   // last_time = time;
-}
-float get_pwm() {
-  #if VERBOSE
-    Serial.println("PWM read: " + String(pwm_value) + " microseconds");
-  #endif
-
-  if (abs(pwm_value) < PWM_DEADZONE) {
-    pwm_was_not_zero = 0;
-    return 0;
-  } else {
-    if (pwm_was_not_zero>=2) {
-      if (pwm_value > 0) {
-        return float(pwm_value - PWM_DEADZONE) * pwm_multiplier_pos;
-      } else {
-        return float(pwm_value + PWM_DEADZONE) * pwm_multiplier_neg;
-      }
-    } else {
-      pwm_was_not_zero = pwm_was_not_zero  ? 1 : 3;
-      return 0;
-    }
-  }
-}

@@ -3,9 +3,13 @@
 #ifndef DEFS_HPP
 #define DEFS_HPP
 
-#define VERBOSE 1
+#define VERBOSE 0
+#define VERBOSE_PWM 1
 
-#define MAIN_LOOP_DELAY 20000 // microseconds
+#define BT_LOG 1
+#define BT_LOG_TIMESTAMP 0
+
+#define MAIN_LOOP_DELAY_US 20000 // microseconds
 #define MAIN_LOOP_DELAY_TICKS (MAIN_LOOP_DELAY * configTICK_RATE_HZ) / 1000000
 
 #define FL_ID 53 // 0x35
@@ -31,8 +35,9 @@
 #define PWM_PIN_PIN GPIO_NUM_2
 #define PWM_MIN_INTERVAL_MICROS 1108
 #define PWM_MAX_INTERVAL_MICROS 1880
-#define PWM_MEDIAN_INTERVAL_MICROS 1500
-#define PWM_DEADZONE 20 // the deadzone for the pwm signal in microseconds
+#define PWM_MEDIAN_INTERVAL_MICROS 1498
+#define PWM_DEADZONE 25 // the deadzone for the pwm signal in microseconds
+#define PWM_WAS_NOT_ZERO_THRESHOLD 2
 
 #define SD_LOG_ENTRY_SIZE 32
 #define SD_CS_PIN 17

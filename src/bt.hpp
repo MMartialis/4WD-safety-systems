@@ -14,7 +14,11 @@ char* timestamp();
 template<typename... Args>
 void bt_log(Args... args) {
     String msg = ((String(args) + ...));
+#if BT_LOG && BT_LOG_TIMESTAMP
     SerialBt.printf("%s: %s", timestamp(), msg.c_str());
+#elif BT_LOG
+    SerialBt.printf("%s", msg.c_str());
+#endif
 }
 
 void bt_cmd(String cmd);
