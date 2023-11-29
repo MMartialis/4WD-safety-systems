@@ -59,12 +59,14 @@ void IRAM_ATTR set_can_read_task(void *arg) {
 
   TaskHandle_t myHandler;
   if (activeCounter == 0) {
+    gpio_set_intr_type(CAN0_INT_PIN, GPIO_INTR_LOW_LEVEL);
     coreId = 0;
     myHandler = HandlerCAN_0;
   } else if (activeCounter == 1) {
     coreId = 1;
     myHandler = HandlerCAN_1;
   } else {
+    gpio_set_intr_type(CAN0_INT_PIN, GPIO_INTR_NEGEDGE);
     return;
   }
 
@@ -77,14 +79,6 @@ void IRAM_ATTR set_can_read_task(void *arg) {
     1
   );
 }
-
-// void this_is_needed(void *params) {
-//   vTaskDelete(NULL);
-// }
-
-// void this_is_needed2(void *params) {
-//   vTaskDelete(NULL);
-// }
 
 void IRAM_ATTR put_message_in_buffer(void *arg) {
   activeCounter++;

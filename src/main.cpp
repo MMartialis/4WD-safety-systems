@@ -65,7 +65,7 @@ void bt_log_csv(void *params){
     vescRL.erpm, vescRL.current,
     vescRR.erpm, vescRR.current);
     bt_log((String)log);
-    vTaskDelay(5);
+    vTaskDelay(5/portTICK_PERIOD_MS);
   }
 }
 
@@ -80,9 +80,9 @@ void setup() {
 
 
   // wait for bluetooth to connect
-  while (!SerialBt.available()) {
-    delay(100);
-  }
+  // while (!SerialBt.available()) {
+  //   delay(100);
+  // }
 
   //*******************************************************************************************
   // PWM setup
@@ -138,33 +138,35 @@ void setup() {
   //                         3,             /* Priority of the task */
   //                         &HandlerCAN_1,     /* Task handle. */
   //                         0              /* Core where the task should run */
-  );
+  // );
 
-  delay(1000);
+  // delay(1000);
 
-  xTaskCreatePinnedToCore(&core_0_setup,  /* Function to implement the task */
-                          "core_0_setup", /* Name of the task */
-                          2048,           /* Stack size in words */
-                          NULL,           /* Task input parameter */
-                          2,              /* Priority of the task */
-                          &Handler0,      /* Task handle. */
-                          0               /* Core where the task should run */
-  );
+  // xTaskCreatePinnedToCore(&core_0_setup,  /* Function to implement the task */
+  //                         "core_0_setup", /* Name of the task */
+  //                         2048,           /* Stack size in words */
+  //                         NULL,           /* Task input parameter */
+  //                         2,              /* Priority of the task */
+  //                         &Handler0,      /* Task handle. */
+  //                         0               /* Core where the task should run */
+  // );
 
+  can_setup_gpio_interrupt();     // Set up interrupt handler for GPIO pin
+  can_configure_gpio_interrupt(); // Configure GPIO pin for interrupt
 #if VERBOSE
   Serial.println("CAN0 interrupt attached");
 #endif
 
   //*******************************************************************************************
   // start Bluetooth logging
-   xTaskCreatePinnedToCore(&bt_log_csv, /* Function to implement the task */
-                          "bt_log_csv",       /* Name of the task */
-                          3000,           /* Stack size in words */
-                          NULL,          /* Task input parameter */
-                          1,             /* Priority of the task */
-                          &HandlerBt,     /* Task handle. */
-                          0              /* Core where the task should run */
-  );
+  //  xTaskCreatePinnedToCore(&bt_log_csv, /* Function to implement the task */
+  //                         "bt_log_csv",       /* Name of the task */
+  //                         3000,           /* Stack size in words */
+  //                         NULL,          /* Task input parameter */
+  //                         1,             /* Priority of the task */
+  //                         &HandlerBt,     /* Task handle. */
+  //                         0              /* Core where the task should run */
+  // );
 
 #if VERBOSE
   Serial.println("Bluetooth logging started");
