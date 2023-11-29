@@ -39,8 +39,7 @@
 extern char msgBuffer[RX_MSG_BUFFER_LEN][12];
 extern MCP_CAN CAN0;
 extern BluetoothSerial SerialBt;
-extern TaskHandle_t HandlerCAN_0;
-extern TaskHandle_t HandlerCAN_1;
+extern TaskHandle_t HandlerCAN;
 
 extern esc vescFL, vescFR, vescRL, vescRR;
 
@@ -57,7 +56,7 @@ float pwm = 0;
 //---------------------------------------------------------------------------------------------
 
 void bt_log_csv(void *params){
-  while(1){
+  while(1) {
     char log[100] = "";
     sprintf(log, "%.2f,\t%.2d,%.2f,\t%.2d,%.2f,\t%.2d,%.2f,\t%.2d,%.2f\n", pwm,
     vescFL.erpm, vescFL.current,
@@ -65,7 +64,6 @@ void bt_log_csv(void *params){
     vescRL.erpm, vescRL.current,
     vescRR.erpm, vescRR.current);
     bt_log((String)log);
-    Serial.println("b" + (String)xPortGetCoreID());
     vTaskDelay(5/portTICK_PERIOD_MS);
   }
 }
@@ -127,17 +125,7 @@ void setup() {
                           1024,           /* Stack size in words */
                           NULL,          /* Task input parameter */
                           3,             /* Priority of the task */
-                          &HandlerCAN_0,     /* Task handle. */
-                          0              /* Core where the task should run */
-  );
-  delay(1000);
-
-  xTaskCreatePinnedToCore(&this_is_needed2, /* Function to implement the task */
-                          "noooo",       /* Name of the task */
-                          1024,           /* Stack size in words */
-                          NULL,          /* Task input parameter */
-                          3,             /* Priority of the task */
-                          &HandlerCAN_1,     /* Task handle. */
+                          &HandlerCAN,     /* Task handle. */
                           0              /* Core where the task should run */
   );
 
@@ -177,22 +165,6 @@ void setup() {
 
 //---------------------------------------------------------------------------------------------
 void loop() {
-  // if (eTaskGetState(Handler0) == eDeleted) {
-  // xTaskCreatePinnedToCore(&put_message_in_buffer, 
-  //   "CAN read task", 
-  //   3000, 
-  //   NULL, 
-  //   3,
-  //   &Handler0, 
-  //   0
-  // );
-  // }
-  //*******************************************************************************************
-  // Bluetooth check
-  // if (SerialBt.available()) {
-  //   bt_cmd(SerialBt.readStringUntil('\n'));
-  // }
-
   pwm = get_pwm();
 
   if (pwm >= 0) {
@@ -218,6 +190,7 @@ void loop() {
   comm_can_set_current(RL_ID, currentRL);
   comm_can_set_current(RR_ID, currentRR);
   gpio_intr_enable(CAN0_INT_PIN);
+  vTaskResume(HandlerCAN);
 
   // delayMicroseconds(MAIN_LOOP_DELAY_US);
   vTaskDelay(MAIN_LOOP_DELAY_TICKS);

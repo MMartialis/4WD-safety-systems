@@ -32,11 +32,7 @@ void can_configure_gpio_interrupt();
 
 void IRAM_ATTR put_message_in_buffer(void* arg);
 
-void IRAM_ATTR set_can_read_task(void* arg);
-
 void this_is_needed(void* params);
-
-void this_is_needed2(void* params);
 
 void buffer_append_int16(uint8_t *buffer, int16_t number, int32_t *index);
 

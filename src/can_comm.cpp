@@ -25,8 +25,7 @@ long unsigned int rxId;
 uint8_t len = 0;
 uint8_t rxBuf[8];
 
-TaskHandle_t HandlerCAN_0; 
-TaskHandle_t HandlerCAN_1;
+TaskHandle_t HandlerCAN;
 
 intr_handle_t handleCAN; // Declare the handle variable globally or in an
                          // appropriate scope
@@ -35,7 +34,7 @@ char msgBuffer[RX_MSG_BUFFER_LEN][12];
 
 void can_configure_gpio_interrupt() {
   gpio_config_t io_conf;
-  io_conf.intr_type = GPIO_INTR_LOW_LEVEL; // Interrupt on rising or falling edge
+  io_conf.intr_type = GPIO_INTR_NEGEDGE; // Interrupt on rising or falling edge
   io_conf.pin_bit_mask = (1ULL << CAN0_INT_PIN); // Bitmask for the pin
   io_conf.mode = GPIO_MODE_INPUT;                // Set as input mode
   io_conf.pull_up_en = GPIO_PULLUP_DISABLE;      // Disable pull-up
@@ -44,65 +43,47 @@ void can_configure_gpio_interrupt() {
 }
 
 void can_setup_gpio_interrupt() {
-  gpio_isr_handler_add(CAN0_INT_PIN, set_can_read_task, NULL);
+  gpio_isr_handler_add(CAN0_INT_PIN, vTaskResume, HandlerCAN);
 }
 
 void core_0_setup(void *params) {
   can_setup_gpio_interrupt();     // Set up interrupt handler for GPIO pin
   can_configure_gpio_interrupt(); // Configure GPIO pin for interrupt
-  vTaskDelete(NULL);
-}
-
-void IRAM_ATTR set_can_read_task(void *arg) {
-  // uint8_t coreId;
-  //set core to less busy core
-  
-
-  TaskHandle_t *myHandler;
-  if (activeCounter == 0) {
-    gpio_set_intr_type(CAN0_INT_PIN, GPIO_INTR_LOW_LEVEL);
-    // coreId = 0;
-    myHandler = &HandlerCAN_0;
-  } else if (activeCounter == 1) {
-    // coreId = 1;
-    myHandler = &HandlerCAN_1;
-  } else {
-    gpio_set_intr_type(CAN0_INT_PIN, GPIO_INTR_NEGEDGE);
-    return;
-  }
-
   xTaskCreatePinnedToCore(&put_message_in_buffer, 
     "CAN read task", 
     1024, 
     NULL, 
     2,
-    myHandler, 
+    &HandlerCAN, 
     0
   );
+  vTaskDelete(NULL);
 }
 
 void IRAM_ATTR put_message_in_buffer(void *arg) {
-  activeCounter++;
-  if (CAN0.readMsgBuf(&rxId, &len, rxBuf) != CAN_NOMSG) {
-    // return;
-    // }
-    // while (CAN0.readMsgBuf(&rxId, &len, rxBuf) != CAN_NOMSG)
-    // {
-    volatile const uint8_t msgId = (msgCount) % RX_MSG_BUFFER_LEN;
-    msgBuffer[msgId][0] = (byte)(rxId >> 8);
-    msgBuffer[msgId][1] = (byte)rxId;
-    msgBuffer[msgId][2] = (byte)len;
-    for (int i = 0; i < 8; ++i) {
-      msgBuffer[msgId][i + 3] = rxBuf[i];
+  // activeCounter++;
+  while (true) {
+    if (CAN0.readMsgBuf(&rxId, &len, rxBuf) != CAN_NOMSG) {
+      // return;
+      // }
+      // while (CAN0.readMsgBuf(&rxId, &len, rxBuf) != CAN_NOMSG)
+      // {
+      volatile const uint8_t msgId = (msgCount) % RX_MSG_BUFFER_LEN;
+      msgBuffer[msgId][0] = (byte)(rxId >> 8);
+      msgBuffer[msgId][1] = (byte)rxId;
+      msgBuffer[msgId][2] = (byte)len;
+      for (int i = 0; i < 8; ++i) {
+        msgBuffer[msgId][i + 3] = rxBuf[i];
+      }
+      msgBuffer[msgId][11] = 0x00;
+      msgCount++;
+    } else {
+      vTaskSuspend(NULL);
     }
-    msgBuffer[msgId][11] = 0x00;
-    msgCount++;
-    gpio_set_intr_type(CAN0_INT_PIN, GPIO_INTR_LOW_LEVEL);
-  } else {
-    gpio_set_intr_type(CAN0_INT_PIN, GPIO_INTR_NEGEDGE);
   }
-  activeCounter--;
-  vTaskDelete(NULL);
+  
+  // activeCounter--;
+  // vTaskDelete(NULL);
 }
 
 void this_is_needed(void *params) {
