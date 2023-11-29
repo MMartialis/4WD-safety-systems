@@ -99,11 +99,6 @@ void update_esc_status_control() { // updates the esc status variables for
       #if VERBOSE
         Serial.println("already read message");
       #endif
-      // msgId--;
-      // if (msgId > RX_MSG_BUFFER_LEN - 1) {
-      //   msgId = RX_MSG_BUFFER_LEN - 1;
-      // }
-      // continue;
       break;
     }
 

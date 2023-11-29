@@ -54,17 +54,18 @@ void core_0_setup(void *params) {
 }
 
 void IRAM_ATTR set_can_read_task(void *arg) {
-  uint8_t coreId;
+  // uint8_t coreId;
   //set core to less busy core
+  
 
-  TaskHandle_t myHandler;
+  TaskHandle_t *myHandler;
   if (activeCounter == 0) {
     gpio_set_intr_type(CAN0_INT_PIN, GPIO_INTR_LOW_LEVEL);
-    coreId = 0;
-    myHandler = HandlerCAN_0;
+    // coreId = 0;
+    myHandler = &HandlerCAN_0;
   } else if (activeCounter == 1) {
-    coreId = 1;
-    myHandler = HandlerCAN_1;
+    // coreId = 1;
+    myHandler = &HandlerCAN_1;
   } else {
     gpio_set_intr_type(CAN0_INT_PIN, GPIO_INTR_NEGEDGE);
     return;
@@ -74,9 +75,9 @@ void IRAM_ATTR set_can_read_task(void *arg) {
     "CAN read task", 
     1024, 
     NULL, 
-    1,
-    &myHandler, 
-    1
+    2,
+    myHandler, 
+    0
   );
 }
 
@@ -96,12 +97,21 @@ void IRAM_ATTR put_message_in_buffer(void *arg) {
     }
     msgBuffer[msgId][11] = 0x00;
     msgCount++;
-
+    Serial.println("a");
     gpio_set_intr_type(CAN0_INT_PIN, GPIO_INTR_LOW_LEVEL);
   } else {
+    Serial.println("b");
     gpio_set_intr_type(CAN0_INT_PIN, GPIO_INTR_NEGEDGE);
   }
   activeCounter--;
+  vTaskDelete(NULL);
+}
+
+void this_is_needed(void *params) {
+  vTaskDelete(NULL);
+}
+
+void this_is_needed2(void *params) {
   vTaskDelete(NULL);
 }
 
