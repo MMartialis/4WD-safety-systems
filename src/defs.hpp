@@ -3,8 +3,8 @@
 #ifndef DEFS_HPP
 #define DEFS_HPP
 
-#define VERBOSE 1
-#define VERBOSE_PWM 1
+#define VERBOSE 0
+#define VERBOSE_PWM 0
 
 #define BT_LOG 1
 #define BT_LOG_TIMESTAMP 1

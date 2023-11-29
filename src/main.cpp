@@ -65,6 +65,7 @@ void bt_log_csv(void *params){
     vescRL.erpm, vescRL.current,
     vescRR.erpm, vescRR.current);
     bt_log((String)log);
+    Serial.println("b" + (String)xPortGetCoreID());
     vTaskDelay(5/portTICK_PERIOD_MS);
   }
 }
@@ -162,7 +163,7 @@ void setup() {
                           "bt_log_csv",       /* Name of the task */
                           3000,           /* Stack size in words */
                           NULL,          /* Task input parameter */
-                          1,             /* Priority of the task */
+                          0,             /* Priority of the task */
                           &HandlerBt,     /* Task handle. */
                           0              /* Core where the task should run */
   );
@@ -176,19 +177,21 @@ void setup() {
 
 //---------------------------------------------------------------------------------------------
 void loop() {
+  // if (eTaskGetState(Handler0) == eDeleted) {
   // xTaskCreatePinnedToCore(&put_message_in_buffer, 
   //   "CAN read task", 
   //   3000, 
   //   NULL, 
-  //   2,
+  //   3,
   //   &Handler0, 
   //   0
   // );
+  // }
   //*******************************************************************************************
   // Bluetooth check
-  if (SerialBt.available()) {
-    bt_cmd(SerialBt.readStringUntil('\n'));
-  }
+  // if (SerialBt.available()) {
+  //   bt_cmd(SerialBt.readStringUntil('\n'));
+  // }
 
   pwm = get_pwm();
 

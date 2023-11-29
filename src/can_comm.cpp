@@ -97,10 +97,8 @@ void IRAM_ATTR put_message_in_buffer(void *arg) {
     }
     msgBuffer[msgId][11] = 0x00;
     msgCount++;
-    Serial.println("a");
     gpio_set_intr_type(CAN0_INT_PIN, GPIO_INTR_LOW_LEVEL);
   } else {
-    Serial.println("b");
     gpio_set_intr_type(CAN0_INT_PIN, GPIO_INTR_NEGEDGE);
   }
   activeCounter--;
