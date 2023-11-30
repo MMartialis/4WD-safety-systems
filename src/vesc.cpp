@@ -16,6 +16,7 @@
 
 extern uint8_t msgCount;
 extern char msgBuffer[RX_MSG_BUFFER_LEN][12];
+volatile boolean newMsg = false;
 
 // can IDs
 // első   jobb  53, bal 77
@@ -113,7 +114,7 @@ void update_esc_status_control() { // updates the esc status variables for
 
     // go to the previous message
     msgId--;
-
+    newMsg=true;
     // if msgId is out of bounds, set it to the last element
     if (msgId > RX_MSG_BUFFER_LEN - 1) {
       msgId = RX_MSG_BUFFER_LEN - 1;

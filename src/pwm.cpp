@@ -4,6 +4,7 @@
 #include "soc/rtc_wdt.h"
 
 extern bool en_pwm; // PWM read enabled or not
+extern volatile boolean newMsg;
 
 volatile uint8_t pwm_was_not_zero = 0;
 
@@ -49,7 +50,7 @@ float get_pwm() {
   #if VERBOSE || VERBOSE_PWM
     Serial.println("PWM read: " + String(pwm_value) + " microseconds");
   #endif
-
+  newMsg=true;
   if (abs(pwm_value) < PWM_DEADZONE) {
     pwm_was_not_zero = 0;
     return 0;

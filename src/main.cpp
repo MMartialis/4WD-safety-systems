@@ -40,6 +40,7 @@ extern char msgBuffer[RX_MSG_BUFFER_LEN][12];
 extern MCP_CAN CAN0;
 extern BluetoothSerial SerialBt;
 extern TaskHandle_t HandlerCAN;
+extern volatile boolean newMsg; 
 
 extern esc vescFL, vescFR, vescRL, vescRR;
 
@@ -57,13 +58,18 @@ float pwm = 0;
 
 void bt_log_csv(void *params){
   while(1) {
-    char log[100] = "";
-    sprintf(log, "%.2f,\t%.2d,%.2f,\t%.2d,%.2f,\t%.2d,%.2f,\t%.2d,%.2f\n", pwm,
-    vescFL.erpm, vescFL.current,
-    vescFR.erpm, vescFR.current,
-    vescRL.erpm, vescRL.current,
-    vescRR.erpm, vescRR.current);
-    bt_log((String)log);
+    
+    if(newMsg) {
+      newMsg = false;
+
+      char log[100] = "";
+      sprintf(log, "%.2f,\t%.2d,%.2f,\t%.2d,%.2f,\t%.2d,%.2f,\t%.2d,%.2f\n", pwm,
+      vescFL.erpm, vescFL.current,
+      vescFR.erpm, vescFR.current,
+      vescRL.erpm, vescRL.current,
+      vescRR.erpm, vescRR.current);
+      bt_log((String)log);
+    }
     vTaskDelay(5/portTICK_PERIOD_MS);
   }
 }
