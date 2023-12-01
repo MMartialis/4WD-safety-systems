@@ -247,7 +247,7 @@ int8_t if_sliding() { // 0: no sliding/both/any axle straight, 1: front sliding,
     float radious_front = HALF_AXLE_WIDTH * (v_fl + v_fr) / (v_fl - v_fr);
     float radious_rear = HALF_AXLE_WIDTH * (v_rl + v_rr) / (v_rl - v_rr);
 
-    int16_t sum_abs_v = abs(v_fl) + abs(v_fr) + abs(v_rl) + abs(v_rr);
+    int16_t sum_abs_v = (abs(v_fl) + abs(v_fr) + abs(v_rl) + abs(v_rr))/4;
     int16_t radious_sum = abs(radious_front) + abs(radious_rear);
 
     float sliding_ratio_front = (sum_abs_v >= MAGIC_TRESHOLD) ? (radious_rear/radious_front)/radious_sum : 0;
