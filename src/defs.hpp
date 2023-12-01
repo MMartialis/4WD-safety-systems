@@ -42,5 +42,22 @@
 #define SD_LOG_ENTRY_SIZE 32
 #define SD_CS_PIN 17
 
+#define WHEEL_RADIUS 0.095 // meters
+#define WHEEL_DIAMETER WHEEL_RADIUS * 2 // meters
+#define WHEEL_CIRCUMFERENCE WHEEL_DIAMETER * PI // meters
+#define POLE_PAIR_COUNT 7
+#define GEAR_RATIO_FRONT 3.6
+#define GEAR_RATIO_REAR 5.2
+#define ERPM_TO_MPS_FRONT WHEEL_CIRCUMFERENCE / (POLE_PAIR_COUNT * GEAR_RATIO_FRONT * 60)
+#define ERPM_TO_MPS_REAR WHEEL_CIRCUMFERENCE / (POLE_PAIR_COUNT * GEAR_RATIO_REAR * 60)
+#define AXLE_WIDTH 0.338 // meters
+#define HALF_AXLE_WIDTH AXLE_WIDTH / 2 // meters
+
+#define MAGIC_TRESHOLD 0.5 // m/s
+#define IS_SLIDING_THRESHOLD_FRONT 0.2 // unit: I have no idea, please ask about this in the exam :D
+#define IS_SLIDING_THRESHOLD_REAR 0.2 // unit: I have no idea
+#define REAR_TRACTION_CONTROL_TIMEOUT 0 // milliseconds
+#define FRONT_TRACTION_CONTROL_TIMEOUT 0 // milliseconds
+
 #endif
 

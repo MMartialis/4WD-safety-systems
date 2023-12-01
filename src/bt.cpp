@@ -6,6 +6,9 @@ BluetoothSerial SerialBt;
 
 bool en_pwm = true; // PWM read enabled or not
 extern double pwm;
+extern boolean traction_control_enabled;
+extern boolean traction_control_active;
+extern int8_t sliding;
 // extern TaskHandle_t Handler1;
 
 // a list of words meaning enable/on
@@ -23,7 +26,32 @@ void bt_cmd(String cmd) {
 
   if (command == "r" || command == "reset") { // reset
     esp_reset();
-  } else if (command == "p" || command == "pwm") { // pwm
+  } else if (command == "t" || command == "tc"|| command == "traction-control") { // traction control
+    // if command[1] in enable_words:
+    String second_word = cmd.substring(cmd.indexOf(' ') + 1);
+    if (std::find(std::begin(enable_words), std::end(enable_words), second_word) !=
+        std::end(enable_words)) { // enable
+      traction_control_enabled = true;
+      bt_log("Traction control enabled\n");
+    } else if (std::find(std::begin(disable_words), std::end(disable_words), second_word) !=
+               std::end(disable_words)) { // disable
+      traction_control_enabled = false;
+      traction_control_active = false;
+      sliding = 0;
+      bt_log("Traction control disabled\n");
+    }
+    // if no second word, just print status
+    else {
+      if (traction_control_enabled) {
+        bt_log("Traction control enabled\n");
+      } else {
+        bt_log("Traction control disabled\n");
+      }
+    }
+  } 
+  
+  
+  else if (command == "p" || command == "pwm") { // pwm
     // if command[1] in enable_words:
     String second_word = cmd.substring(cmd.indexOf(' ') + 1);
     if (std::find(std::begin(enable_words), std::end(enable_words), second_word) !=
@@ -38,41 +66,20 @@ void bt_cmd(String cmd) {
       pwm_status();
     }
   } else {
-    bt_log("Invalid command");
+    bt_log("Invalid command\n");
     // list of valid commands with syntax
-    bt_log("Valid commands:");
-    bt_log("r, reset");
-    bt_log("p, pwm [enable|disable]");
+    bt_log("Valid commands:\n");
+    bt_log("r, reset\n");
+    bt_log("p, pwm [enable|disable]\n");
+    bt_log("t, tc, traction-control [enable|disable]\n");
   }
-
-
-  // switch (command[0]) {
-  // case 'r': // reset
-  //   esp_reset();
-  //   break;
-  // case 'p': // pwm
-  //   // if command[1] in enable_words:
-  //   if (enable_words->indexOf(command[1]) != -1) { // enable
-  //     pwm_enable(true);
-  //   } else if (disable_words->indexOf(command[1]) != -1) { // disable
-  //     pwm_enable(false);
-  //   }
-  //   // if no second word, just print status
-  //   else {
-  //     pwm_status();
-  //   }
-  //   break;
-  // default:
-  //   bt_log("Invalid command");
-  //   break;
-  // }
 }
 
 //---------------------------------------------------------------------------------------------
 
 void bt_setup() {
   SerialBt.begin("esp_32_awd");
-  bt_log("Bluetooth setup completed");
+  bt_log("Bluetooth setup completed\n");
   #if VERBOSE
     Serial.println("Bluetooth setup completed");
   #endif
@@ -97,9 +104,9 @@ void esp_reset() {
 
 void pwm_status() {
   if (en_pwm) {
-    bt_log("Remote is enabled");
+    bt_log("Remote is enabled\n");
   } else {
-    bt_log("Remote is disabled");
+    bt_log("Remote is disabled\n");
   }
 }
 
@@ -108,11 +115,11 @@ void pwm_enable(bool enable) { // set emulated pwm value, Warning: THIS WILL
   if (enable) {
     en_pwm = true;
     gpio_intr_enable(PWM_PIN_PIN);
-    bt_log("Remote enabled");
+    bt_log("Remote enabled\n");
   } else {
     en_pwm = false;
     gpio_intr_disable(PWM_PIN_PIN);
     pwm = 0;
-    bt_log("Remote disabled");
+    bt_log("Remote disabled\n");
   }
 }

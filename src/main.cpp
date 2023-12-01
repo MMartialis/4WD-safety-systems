@@ -56,6 +56,13 @@ float currentRR = 0;
 
 float pwm = 0;
 
+int8_t if_sliding();
+int8_t sliding = 0;
+boolean traction_control_enabled = true;
+boolean traction_control_active = false;
+int32_t traction_control_front_timer = 0;
+int32_t traction_control_rear_timer = 0;
+
 //---------------------------------------------------------------------------------------------
 
 void bt_log_csv(void *params){
@@ -65,11 +72,12 @@ void bt_log_csv(void *params){
       newMsg = false;
 
       char log[100] = "";
-      sprintf(log, "%.2f,\t%.2d,%.2f,\t%.2d,%.2f,\t%.2d,%.2f,\t%.2d,%.2f\n", pwm,
+      sprintf(log, "%.2f,\t%.2d,%.2f,\t%.2d,%.2f,\t%.2d,%.2f,\t%.2d,%.2f,\t%d\n", pwm,
       vescFL.erpm, vescFL.current,
       vescFR.erpm, vescFR.current,
       vescRL.erpm, vescRL.current,
-      vescRR.erpm, vescRR.current);
+      vescRR.erpm, vescRR.current,
+      sliding);
       bt_log((String)log);
     }
     vTaskDelay(5/portTICK_PERIOD_MS);
@@ -191,19 +199,74 @@ void loop() {
     currentRR = pwm * RR_MAX_BRAKE_CURRENT;
   }
   }
+  if (traction_control_enabled) {
+    sliding = if_sliding();
+  }
   gpio_intr_disable(CAN0_INT_PIN);
-  /*
-   * if csúsz, apply minimum deterration to current
-   */
   update_esc_status_control();
+  // if sliding
+  if (sliding){
+    if(sliding == 1){ // sliding front
+      comm_can_set_rpm(FL_ID, vescRL.erpm);
+      comm_can_set_rpm(FR_ID, vescRR.erpm);
+      comm_can_set_current(RL_ID, currentRL);
+      comm_can_set_current(RR_ID, currentRR);
 
-  comm_can_set_current(FL_ID, currentFL);
-  comm_can_set_current(FR_ID, currentFR);
-  comm_can_set_current(RL_ID, currentRL);
-  comm_can_set_current(RR_ID, currentRR);
+    } else if (sliding == 2){
+      comm_can_set_rpm(RL_ID, vescFL.erpm);
+      comm_can_set_rpm(RR_ID, vescFR.erpm);
+      comm_can_set_current(FL_ID, currentFL);
+      comm_can_set_current(FR_ID, currentFR);
+    }
+  }else{
+    comm_can_set_current(FL_ID, currentFL);
+    comm_can_set_current(FR_ID, currentFR);
+    comm_can_set_current(RL_ID, currentRL);
+    comm_can_set_current(RR_ID, currentRR);
+
+  }
+
+
   gpio_intr_enable(CAN0_INT_PIN);
   vTaskResume(HandlerCAN);
 
   // delayMicroseconds(MAIN_LOOP_DELAY_US);
   vTaskDelay(MAIN_LOOP_DELAY_TICKS);
+}
+
+
+int8_t if_sliding() { // 0: no sliding/both/any axle straight, 1: front sliding, 2: rear sliding
+  double v_fl = vescFL.erpm * ERPM_TO_MPS_FRONT;
+  double v_fr = vescFR.erpm * ERPM_TO_MPS_FRONT;
+  double v_rl = vescRL.erpm * ERPM_TO_MPS_REAR;
+  double v_rr = vescRR.erpm * ERPM_TO_MPS_REAR;
+
+
+  // try catch zero devider (any axle straight)
+  try {
+    float radious_front = HALF_AXLE_WIDTH * (v_fl + v_fr) / (v_fl - v_fr);
+    float radious_rear = HALF_AXLE_WIDTH * (v_rl + v_rr) / (v_rl - v_rr);
+
+    int16_t sum_abs_v = abs(v_fl) + abs(v_fr) + abs(v_rl) + abs(v_rr);
+    int16_t radious_sum = abs(radious_front) + abs(radious_rear);
+
+    float sliding_ratio_front = (sum_abs_v >= MAGIC_TRESHOLD) ? (radious_rear/radious_front)/radious_sum : 0;
+    float sliding_ratio_rear = (sum_abs_v >= MAGIC_TRESHOLD) ? (radious_front/radious_rear)/radious_sum : 0;
+
+    if (sliding_ratio_front > IS_SLIDING_THRESHOLD_FRONT) {
+      if (sliding_ratio_rear > IS_SLIDING_THRESHOLD_REAR) {
+      return 0;
+      } else {
+        return 1;
+      }
+    } else if (sliding_ratio_rear > IS_SLIDING_THRESHOLD_REAR) {
+      return 2;
+    } else {
+      return 0;
+    }
+  } catch (const std::exception &e) {
+    return 0;
+  }
+
+  
 }

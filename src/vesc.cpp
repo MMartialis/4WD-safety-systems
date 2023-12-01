@@ -27,6 +27,9 @@ volatile boolean newMsg = false;
 //   current*10, [8-9] erpm, [10] isread
 esc vescFL, vescFR, vescRL, vescRR;
 
+//---------------------------------------------------------------------------------------------
+// this function is ran on demand, it empties the msgBuffer, and fills the translated data into the esc structs
+
 void update_esc_status_control() { // updates the esc status variables for
                                    // control funcs.
   byte esc_stat = 0; // byte to store whether the escs are updated or not
@@ -105,8 +108,12 @@ void update_esc_status_control() { // updates the esc status variables for
                       (msgBuffer[msgId][4] << 16) | (msgBuffer[msgId][5] << 8) |
                       (msgBuffer[msgId][6]);
 
+    // (*myMotor).current =
+    //     float(((msgBuffer[msgId][7] << 8) | (msgBuffer[msgId][8])) / 10.0);
+
     (*myMotor).current =
-        float(((msgBuffer[msgId][7] << 8) | (msgBuffer[msgId][8])) / 10.0);
+        static_cast<float>(((int16_t)(msgBuffer[0][7] << 8) | msgBuffer[0][8])) / 10.0;
+
 
     // go to the previous message
     msgId--;
@@ -120,6 +127,9 @@ void update_esc_status_control() { // updates the esc status variables for
     #endif
   }
 }
+
+//---------------------------------------------------------------------------------------------
+// similar to update_esc_status_control, but it updates the less important data
 
 //   ezek nem jok >>  if [0] == 16 command id, [1] rx id, [2-3] fet temp*10,
 //   [4-5] motor temp*10, [6-7] current in*10, [8-9] pid pos*50],
