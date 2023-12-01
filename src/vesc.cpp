@@ -34,10 +34,6 @@ void update_esc_status_control() { // updates the esc status variables for
   // uint8_t count = 0; // number of messages processed, stops after
   // RX_MSG_BUFFER_LEN
 
-  //--------------------------------------------------------------------------------
-  // Marci - Roli, de csak ha működik
-  //--------------------------------------------------------------------------------
-
   for (uint8_t i = 0;
        i < RX_MSG_BUFFER_LEN && esc_stat != 0x0f /*all esc updated*/;
        i++) // main loop, until everything is updated

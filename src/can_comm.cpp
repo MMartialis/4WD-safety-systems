@@ -113,7 +113,8 @@ void can_transmit_eid(uint32_t id, const uint8_t *data, uint8_t len,
   Serial.println();
 #endif
 }
-
+//-----------------------------------------------------------------------------------------------
+// Copied code from VESC firmware
 void buffer_append_int16(uint8_t *buffer, int16_t number, int32_t *index) {
   buffer[(*index)++] = number >> 8;
   buffer[(*index)++] = number;

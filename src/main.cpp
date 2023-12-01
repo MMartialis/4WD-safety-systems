@@ -44,6 +44,8 @@ extern volatile boolean newMsg;
 
 extern esc vescFL, vescFR, vescRL, vescRR;
 
+extern bool en_pwm;
+
 TaskHandle_t Handler0;
 TaskHandle_t HandlerBt;
 
@@ -171,6 +173,10 @@ void setup() {
 
 //---------------------------------------------------------------------------------------------
 void loop() {
+  if(SerialBt.available()) {
+    bt_cmd(SerialBt.readStringUntil('\n'));
+  }
+  if(en_pwm){
   pwm = get_pwm();
 
   if (pwm >= 0) {
@@ -184,7 +190,7 @@ void loop() {
     currentRL = pwm * RL_MAX_BRAKE_CURRENT;
     currentRR = pwm * RR_MAX_BRAKE_CURRENT;
   }
-
+  }
   gpio_intr_disable(CAN0_INT_PIN);
   /*
    * if csúsz, apply minimum deterration to current

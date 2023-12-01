@@ -13,29 +13,62 @@ const String enable_words[] = {"enable", "on", "true", "1"};
 // a list of words meaning disable/off
 const String disable_words[] = {"disable", "off", "false", "0"};
 
+//---------------------------------------------------------------------------------------------
 // evaluate bluetooth command
 void bt_cmd(String cmd) {
   // parse command by spaces
   // first word is the command
   String command = cmd.substring(0, cmd.indexOf(' '));
   // switch by first word
-  switch (command[0]) {
-  case 'r': // reset
+
+  if (command == "r" || command == "reset") { // reset
     esp_reset();
-    break;
-  case 'p': // pwm
+  } else if (command == "p" || command == "pwm") { // pwm
     // if command[1] in enable_words:
-    if (enable_words->indexOf(command[1]) != -1) { // enable
+    String second_word = cmd.substring(cmd.indexOf(' ') + 1);
+    if (std::find(std::begin(enable_words), std::end(enable_words), second_word) !=
+        std::end(enable_words)) { // enable
       pwm_enable(true);
-    } else if (disable_words->indexOf(command[1]) != -1) { // disable
+    } else if (std::find(std::begin(disable_words), std::end(disable_words), second_word) !=
+               std::end(disable_words)) { // disable
       pwm_enable(false);
     }
     // if no second word, just print status
     else {
       pwm_status();
     }
+  } else {
+    bt_log("Invalid command");
+    // list of valid commands with syntax
+    bt_log("Valid commands:");
+    bt_log("r, reset");
+    bt_log("p, pwm [enable|disable]");
   }
+
+
+  // switch (command[0]) {
+  // case 'r': // reset
+  //   esp_reset();
+  //   break;
+  // case 'p': // pwm
+  //   // if command[1] in enable_words:
+  //   if (enable_words->indexOf(command[1]) != -1) { // enable
+  //     pwm_enable(true);
+  //   } else if (disable_words->indexOf(command[1]) != -1) { // disable
+  //     pwm_enable(false);
+  //   }
+  //   // if no second word, just print status
+  //   else {
+  //     pwm_status();
+  //   }
+  //   break;
+  // default:
+  //   bt_log("Invalid command");
+  //   break;
+  // }
 }
+
+//---------------------------------------------------------------------------------------------
 
 void bt_setup() {
   SerialBt.begin("esp_32_awd");
@@ -74,9 +107,11 @@ void pwm_enable(bool enable) { // set emulated pwm value, Warning: THIS WILL
                                // DISABLE THE REMOTE!
   if (enable) {
     en_pwm = true;
+    gpio_intr_enable(PWM_PIN_PIN);
     bt_log("Remote enabled");
   } else {
     en_pwm = false;
+    gpio_intr_disable(PWM_PIN_PIN);
     pwm = 0;
     bt_log("Remote disabled");
   }
