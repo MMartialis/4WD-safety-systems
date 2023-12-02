@@ -3,7 +3,7 @@
 #ifndef DEFS_HPP
 #define DEFS_HPP
 
-#define VERBOSE 0
+#define VERBOSE 1
 #define VERBOSE_PWM 0
 
 #define BT_LOG 1
@@ -58,6 +58,8 @@
 #define IS_SLIDING_THRESHOLD_REAR 0.2 // unit: I have no idea
 #define REAR_TRACTION_CONTROL_TIMEOUT 0 // milliseconds
 #define FRONT_TRACTION_CONTROL_TIMEOUT 0 // milliseconds
+#define MAX_AXLE_DIFFERENCE 0.5 // m/s
 
+#define CHOOSE_TRACTION_CONTROL_VERSION 2
 #endif
 
