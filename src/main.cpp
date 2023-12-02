@@ -217,34 +217,60 @@ void loop()
   // if sliding
   if (sliding)
   {
-  //--------------------------------v1---------------------------------------------------
-  #if CHOOSE_TRACTION_CONTROL_VERSION == 1
-        if (sliding == 1)
-        { // sliding front
-          comm_can_set_rpm(FL_ID, vescRL.erpm);
-          comm_can_set_rpm(FR_ID, vescRR.erpm);
-          comm_can_set_current(RL_ID, currentRL);
-          comm_can_set_current(RR_ID, currentRR);
-        }
-        else if (sliding == 2)
-        {
-          comm_can_set_rpm(RL_ID, vescFL.erpm);
-          comm_can_set_rpm(RR_ID, vescFR.erpm);
-          comm_can_set_current(FL_ID, currentFL);
-          comm_can_set_current(FR_ID, currentFR);
-        }
+//--------------------------------v1---------------------------------------------------
+#if CHOOSE_TRACTION_CONTROL_VERSION == 1
+    if (sliding == 1)
+    { // sliding front
+      comm_can_set_rpm(FL_ID, vescRL.erpm);
+      comm_can_set_rpm(FR_ID, vescRR.erpm);
+      comm_can_set_current(RL_ID, currentRL);
+      comm_can_set_current(RR_ID, currentRR);
+    }
+    else if (sliding == 2)
+    {
+      comm_can_set_rpm(RL_ID, vescFL.erpm);
+      comm_can_set_rpm(RR_ID, vescFR.erpm);
+      comm_can_set_current(FL_ID, currentFL);
+      comm_can_set_current(FR_ID, currentFR);
+    }
 
-  //--------------------------------v2---------------------------------------------------
-  #elif CHOOSE_TRACTION_CONTROL_VERSION == 2
+//--------------------------------v2---------------------------------------------------
+#elif CHOOSE_TRACTION_CONTROL_VERSION == 2
+    // F = (θ * β - τ_f - τ_m) / r
+    double friction_force_fl /*F*/ = (ANGULAR_MOMENTUM_FL /*θ*/ * 
+                                      (vescFL.erpm - vescFL.last_erpm) * ERPM_TO_ANGULAR_VELOCITY_FL / (vescFL.erpm_time-vescFL.last_erpm_time) /*β*/ -
+                                      FRICTION_TORQUE_FL(vescFL.erpm) /*τ_f*/ -
+                                      vescFL.current * CURRENT_TO_WHEEL_TORQUE_FL /*τ_m*/) /
+                                     WHEEL_RADIUS /*r*/;
 
-  #endif
-      }
-      else
-      {
-  comm_can_set_current(FL_ID, currentFL);
-  comm_can_set_current(FR_ID, currentFR);
-  comm_can_set_current(RL_ID, currentRL);
-  comm_can_set_current(RR_ID, currentRR);
+    double friction_force_fr /*F*/ = (ANGULAR_MOMENTUM_FR /*θ*/ * 
+                                      (vescFR.erpm - vescFR.last_erpm) * ERPM_TO_ANGULAR_VELOCITY_FR / (vescFR.erpm_time-vescFR.last_erpm_time) /*β*/ -
+                                      FRICTION_TORQUE_FR(vescFR.erpm) /*τ_f*/ -
+                                      vescFR.current * CURRENT_TO_WHEEL_TORQUE_FR /*τ_m*/) /
+                                      WHEEL_RADIUS /*r*/;
+
+    double friction_force_rl /*F*/ = (ANGULAR_MOMENTUM_RL /*θ*/ * 
+                                      (vescRL.erpm - vescRL.last_erpm) * ERPM_TO_ANGULAR_VELOCITY_RL / (vescRL.erpm_time-vescRL.last_erpm_time) /*β*/ -
+                                      FRICTION_TORQUE_RL(vescRL.erpm) /*τ_f*/ -
+                                      vescRL.current * CURRENT_TO_WHEEL_TORQUE_RL /*τ_m*/) /
+                                      WHEEL_RADIUS /*r*/;
+
+    double friction_force_rr /*F*/ = (ANGULAR_MOMENTUM_RR /*θ*/ *
+                                      (vescRR.erpm - vescRR.last_erpm) * ERPM_TO_ANGULAR_VELOCITY_RR / (vescRR.erpm_time-vescRR.last_erpm_time) /*β*/ -
+                                      FRICTION_TORQUE_RR(vescRR.erpm) /*τ_f*/ -
+                                      vescRR.current * CURRENT_TO_WHEEL_TORQUE_RR /*τ_m*/) /
+                                      WHEEL_RADIUS /*r*/;
+
+    double current_fl = (ANGULAR_MOMENTUM_FL*(vescRL.erpm - vescRL.last_erpm) * ERPM_TO_ANGULAR_VELOCITY_RL / (vescRL.erpm_time-vescRL.last_erpm_time)-
+    friction_force_fl*WHEEL_RADIUS)/CURRENT_TO_WHEEL_TORQUE_FL;
+#endif
+  }
+  else
+  {
+    comm_can_set_current(FL_ID, currentFL);
+    comm_can_set_current(FR_ID, currentFR);
+    comm_can_set_current(RL_ID, currentRL);
+    comm_can_set_current(RR_ID, currentRR);
   }
 
   gpio_intr_enable(CAN0_INT_PIN);
@@ -285,17 +311,15 @@ int8_t if_sliding()
 
 #else if CHOOSE_TRACTION_CONTROL_VERSION == 2
   //--------------------------------v2---------------------------------------------------
-
-  float front_rear_diff = vescFL.erpm + vescFR.erpm - vescRL.erpm - vescRR.erpm;
-  front_rear_diff = (abs(front_rear_diff) > MAX_AXLE_DIFFERENCE) ? front_rear_diff : 0;
-
-  if (pwm = 0)
+  if (pwm == 0)
   {
     return 0;
   }
-  else
-  {
-    return (pwm >= 0) == (front_rear_diff > 0) ? (front_rear_diff > 0 ? 1 : -1) : (front_rear_diff > 0 ? -1 : 1);
-  }
+
+  float front_rear_diff = vescFL.erpm + vescFR.erpm - vescRL.erpm - vescRR.erpm;
+  front_rear_diff = (abs(front_rear_diff) > MAX_AXLE_DIFFERENCE) ? front_rear_diff : 0;
+  front_rear_diff = (front_rear_diff > 0) - (front_rear_diff < 0);
+
+  return ((pwm >= 0) == (front_rear_diff > 0)) ? (front_rear_diff) : (-front_rear_diff);
 #endif
 }

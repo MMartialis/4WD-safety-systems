@@ -101,9 +101,12 @@ void update_esc_status_control() { // updates the esc status variables for
       #endif
       break;
     }
+    (*myMotor).last_erpm_time = (*myMotor).erpm_time;
+    (*myMotor).erpm_time = esp_timer_get_time();
 
     // if not read message, update the esc status variables
     msgBuffer[msgId][11] = 1; // set the message to read
+    (*myMotor).last_erpm = (*myMotor).erpm;
     (*myMotor).erpm = (msgBuffer[msgId][3] << 24) |
                       (msgBuffer[msgId][4] << 16) | (msgBuffer[msgId][5] << 8) |
                       (msgBuffer[msgId][6]);
