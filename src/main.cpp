@@ -42,6 +42,8 @@ extern BluetoothSerial SerialBt;
 extern TaskHandle_t HandlerCAN;
 extern volatile boolean newMsg;
 
+extern float traction_conrtol_gain;
+
 extern esc vescFL, vescFR, vescRL, vescRR;
 
 extern bool en_pwm;
@@ -193,7 +195,8 @@ void loop()
   {
     pwm = get_pwm();
 
-    if (pwm >= 0)
+    int64_t erpm_sum = vescFL.erpm + vescFR.erpm - vescRL.erpm - vescRR.erpm;
+    if ((pwm >= 0 ) == (erpm_sum > 0))
     {
       currentFL = pwm * FL_MAX_CURRENT;
       currentFR = pwm * FR_MAX_CURRENT;
@@ -236,33 +239,26 @@ void loop()
 
 //--------------------------------v2---------------------------------------------------
 #elif CHOOSE_TRACTION_CONTROL_VERSION == 2
-    // F = (θ * β - τ_f - τ_m) / r
-    double friction_force_fl /*F*/ = (ANGULAR_MOMENTUM_FL /*θ*/ * 
-                                      (vescFL.erpm - vescFL.last_erpm) * ERPM_TO_ANGULAR_VELOCITY_FL / (vescFL.erpm_time-vescFL.last_erpm_time) /*β*/ -
-                                      FRICTION_TORQUE_FL(vescFL.erpm) /*τ_f*/ -
-                                      vescFL.current * CURRENT_TO_WHEEL_TORQUE_FL /*τ_m*/) /
-                                     WHEEL_RADIUS /*r*/;
+    double angular_accelaration_fl = ((vescFL.erpm - vescFL.last_erpm) / (vescFL.last_erpm_time - vescFL.erpm_time));
+    double angular_accelaration_fr = ((vescFR.erpm - vescFR.last_erpm) / (vescFR.last_erpm_time - vescFR.erpm_time));
+    double angular_accelaration_rl = ((vescRL.erpm - vescRL.last_erpm) / (vescRL.last_erpm_time - vescRL.erpm_time));
+    double angular_accelaration_rr = ((vescRR.erpm - vescRR.last_erpm) / (vescRR.last_erpm_time - vescRR.erpm_time));
+    if (sliding == 1)
+    { // sliding front
+      currentFL = vescFL.current + (angular_accelaration_rl * REFFERENCE_BETA_MULTIPLIER_FL - angular_accelaration_fl * BETA_MULTIPLIER_FL) * traction_conrtol_gain;
+      currentFR = vescFR.current + (angular_accelaration_rr * REFFERENCE_BETA_MULTIPLIER_FR - angular_accelaration_fr * BETA_MULTIPLIER_FR) * traction_conrtol_gain;
+    }
+    else if (sliding == 2)
+    {
+      currentRL = vescRL.current + (angular_accelaration_fl * REFFERENCE_BETA_MULTIPLIER_RL - angular_accelaration_rl * BETA_MULTIPLIER_RL) * traction_conrtol_gain;
+      currentRR = vescRR.current + (angular_accelaration_fr * REFFERENCE_BETA_MULTIPLIER_RR - angular_accelaration_rr * BETA_MULTIPLIER_RR) * traction_conrtol_gain;
+    }
 
-    double friction_force_fr /*F*/ = (ANGULAR_MOMENTUM_FR /*θ*/ * 
-                                      (vescFR.erpm - vescFR.last_erpm) * ERPM_TO_ANGULAR_VELOCITY_FR / (vescFR.erpm_time-vescFR.last_erpm_time) /*β*/ -
-                                      FRICTION_TORQUE_FR(vescFR.erpm) /*τ_f*/ -
-                                      vescFR.current * CURRENT_TO_WHEEL_TORQUE_FR /*τ_m*/) /
-                                      WHEEL_RADIUS /*r*/;
+    comm_can_set_current(FL_ID, currentFL);
+    comm_can_set_current(FR_ID, currentFR);
+    comm_can_set_current(RL_ID, currentRL);
+    comm_can_set_current(RR_ID, currentRR);
 
-    double friction_force_rl /*F*/ = (ANGULAR_MOMENTUM_RL /*θ*/ * 
-                                      (vescRL.erpm - vescRL.last_erpm) * ERPM_TO_ANGULAR_VELOCITY_RL / (vescRL.erpm_time-vescRL.last_erpm_time) /*β*/ -
-                                      FRICTION_TORQUE_RL(vescRL.erpm) /*τ_f*/ -
-                                      vescRL.current * CURRENT_TO_WHEEL_TORQUE_RL /*τ_m*/) /
-                                      WHEEL_RADIUS /*r*/;
-
-    double friction_force_rr /*F*/ = (ANGULAR_MOMENTUM_RR /*θ*/ *
-                                      (vescRR.erpm - vescRR.last_erpm) * ERPM_TO_ANGULAR_VELOCITY_RR / (vescRR.erpm_time-vescRR.last_erpm_time) /*β*/ -
-                                      FRICTION_TORQUE_RR(vescRR.erpm) /*τ_f*/ -
-                                      vescRR.current * CURRENT_TO_WHEEL_TORQUE_RR /*τ_m*/) /
-                                      WHEEL_RADIUS /*r*/;
-
-    double current_fl = (ANGULAR_MOMENTUM_FL*(vescRL.erpm - vescRL.last_erpm) * ERPM_TO_ANGULAR_VELOCITY_RL / (vescRL.erpm_time-vescRL.last_erpm_time)-
-    friction_force_fl*WHEEL_RADIUS)/CURRENT_TO_WHEEL_TORQUE_FL;
 #endif
   }
   else

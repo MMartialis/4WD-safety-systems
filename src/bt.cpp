@@ -9,6 +9,8 @@ extern double pwm;
 extern boolean traction_control_enabled;
 extern boolean traction_control_active;
 extern int8_t sliding;
+float traction_conrtol_gain=1;
+
 // extern TaskHandle_t Handler1;
 
 // a list of words meaning enable/on
@@ -80,6 +82,17 @@ void bt_cmd(String cmd)
       pwm_status();
     }
   }
+  else if(command == "g" || command == "gain"){
+    // if there is a second word, and it is a number
+    String second_word = cmd.substring(cmd.indexOf(' ') + 1);
+    if(second_word.length() > 0 && second_word.toInt() > 0){
+      traction_conrtol_gain = second_word.toFloat();
+      bt_log("Traction control gain is now " + second_word + "\n");
+    }
+    else{
+      bt_log("Traction control gain is " + String(traction_conrtol_gain) + "\n");
+    }
+  }
   else
   {
     bt_log("Invalid command \"" + cmd + "\"\n");
@@ -88,6 +101,7 @@ void bt_cmd(String cmd)
     bt_log("r, reset\n");
     bt_log("p, pwm [enable|disable]\n");
     bt_log("t, tc, traction-control [enable|disable]\n");
+    bt_log("g, gain [number]\n");
   }
 }
 
