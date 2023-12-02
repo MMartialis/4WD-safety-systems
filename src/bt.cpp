@@ -9,7 +9,7 @@ extern double pwm;
 extern boolean traction_control_enabled;
 extern boolean traction_control_active;
 extern int8_t sliding;
-float traction_conrtol_gain=1;
+float traction_conrtol_gain=0.8;
 
 // extern TaskHandle_t Handler1;
 

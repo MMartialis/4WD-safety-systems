@@ -56,9 +56,10 @@ float currentFR = 0;
 float currentRL = 0;
 float currentRR = 0;
 
+int64_t erpm_sum = 0;
 float pwm = 0;
 
-int8_t if_sliding();
+float if_sliding();
 int8_t sliding = 0;
 boolean traction_control_enabled = true;
 boolean traction_control_active = false;
@@ -195,8 +196,8 @@ void loop()
   {
     pwm = get_pwm();
 
-    int64_t erpm_sum = vescFL.erpm + vescFR.erpm - vescRL.erpm - vescRR.erpm;
-    if ((pwm >= 0 ) == (erpm_sum > 0))
+    erpm_sum = vescFL.erpm + vescFR.erpm - vescRL.erpm - vescRR.erpm;
+    if ((pwm >= 0 ) == (erpm_sum >= 0))
     {
       currentFL = pwm * FL_MAX_CURRENT;
       currentFR = pwm * FR_MAX_CURRENT;
@@ -245,13 +246,14 @@ void loop()
     double angular_accelaration_rr = ((vescRR.erpm - vescRR.last_erpm) / (vescRR.last_erpm_time - vescRR.erpm_time));
     if (sliding == 1)
     { // sliding front
-      currentFL = vescFL.current + (angular_accelaration_rl * REFFERENCE_BETA_MULTIPLIER_FL - angular_accelaration_fl * BETA_MULTIPLIER_FL) * traction_conrtol_gain;
-      currentFR = vescFR.current + (angular_accelaration_rr * REFFERENCE_BETA_MULTIPLIER_FR - angular_accelaration_fr * BETA_MULTIPLIER_FR) * traction_conrtol_gain;
+      currentFL = vescFL.current + ((erpm_sum < 0) - (erpm_sum > 0)) * (angular_accelaration_rl * REFFERENCE_BETA_MULTIPLIER_FL - angular_accelaration_fl * BETA_MULTIPLIER_FL) * traction_conrtol_gain;
+      currentFR = vescFR.current + ((erpm_sum < 0) - (erpm_sum > 0)) * (angular_accelaration_rr * REFFERENCE_BETA_MULTIPLIER_FR - angular_accelaration_fr * BETA_MULTIPLIER_FR) * traction_conrtol_gain;
+      
     }
-    else if (sliding == 2)
+    else if (sliding == -1)
     {
-      currentRL = vescRL.current + (angular_accelaration_fl * REFFERENCE_BETA_MULTIPLIER_RL - angular_accelaration_rl * BETA_MULTIPLIER_RL) * traction_conrtol_gain;
-      currentRR = vescRR.current + (angular_accelaration_fr * REFFERENCE_BETA_MULTIPLIER_RR - angular_accelaration_rr * BETA_MULTIPLIER_RR) * traction_conrtol_gain;
+      currentRL = vescRL.current + ((erpm_sum < 0) - (erpm_sum > 0)) * (angular_accelaration_fl * REFFERENCE_BETA_MULTIPLIER_RL - angular_accelaration_rl * BETA_MULTIPLIER_RL) * traction_conrtol_gain;
+      currentRR = vescRR.current + ((erpm_sum < 0) - (erpm_sum > 0)) * (angular_accelaration_fr * REFFERENCE_BETA_MULTIPLIER_RR - angular_accelaration_rr * BETA_MULTIPLIER_RR) * traction_conrtol_gain;
     }
 
     comm_can_set_current(FL_ID, currentFL);
@@ -276,7 +278,7 @@ void loop()
   vTaskDelay(MAIN_LOOP_DELAY_TICKS);
 }
 
-int8_t if_sliding()
+float if_sliding()
 { // 0: no sliding/both/any axle straight, 1: front sliding, 2: rear sliding
 
 #if CHOOSE_TRACTION_CONTROL_VERSION == 1
