@@ -97,7 +97,7 @@ void this_is_needed2(void *params) {
 }
 
 // Implementation for sending extended ID CAN-frames
-void can_transmit_eid(uint32_t id, const uint8_t *data, uint8_t len,
+void can_transmit_eid(uint32_t id, const uint8_t *data, uint8_t len, 
                       uint8_t rtr) {
   CAN0.sendMsgBuf((unsigned long)id, (byte)1, (byte)rtr, (byte)len,
                   (byte *)data);

@@ -30,8 +30,9 @@ esc vescFL, vescFR, vescRL, vescRR;
 //---------------------------------------------------------------------------------------------
 // this function is ran on demand, it empties the msgBuffer, and fills the translated data into the esc structs
 
-void update_esc_status_control() { // updates the esc status variables for
-                                   // control funcs.
+void update_esc_status_control()
+{                    // updates the esc status variables for
+                     // control funcs.
   byte esc_stat = 0; // byte to store whether the escs are updated or not
   uint8_t msgId = (uint8_t)(msgCount - 1) % RX_MSG_BUFFER_LEN;
   // uint8_t count = 0; // number of messages processed, stops after
@@ -52,12 +53,14 @@ void update_esc_status_control() { // updates the esc status variables for
                   msgBuffer[msgId][10]);
 #endif
     // verifying command id
-    if (msgBuffer[msgId][0] != 0x09) {
+    if (msgBuffer[msgId][0] != 0x09)
+    {
 #if VERBOSE
       Serial.printf("invalid command id %d \n", msgBuffer[msgId][0]);
 #endif
       msgId--;
-      if (msgId > RX_MSG_BUFFER_LEN - 1) {
+      if (msgId > RX_MSG_BUFFER_LEN - 1)
+      {
         msgId = RX_MSG_BUFFER_LEN - 1;
       }
       continue;
@@ -66,7 +69,8 @@ void update_esc_status_control() { // updates the esc status variables for
     esc *myMotor;
 
     // verify esc canbus id
-    switch (msgBuffer[msgId][1]) {
+    switch (msgBuffer[msgId][1])
+    {
     case FL_ID:
       esc_stat |= 0b00000001;
       myMotor = &vescFL;
@@ -88,17 +92,19 @@ void update_esc_status_control() { // updates the esc status variables for
       Serial.println("invalid esc id");
 #endif
       msgId--;
-      if (msgId > RX_MSG_BUFFER_LEN - 1) {
+      if (msgId > RX_MSG_BUFFER_LEN - 1)
+      {
         msgId = RX_MSG_BUFFER_LEN - 1;
       }
       continue;
     }
 
     // if the message is a read message, skip it
-    if (msgBuffer[msgId][11]) {
-      #if VERBOSE
-        Serial.println("already read message");
-      #endif
+    if (msgBuffer[msgId][11])
+    {
+#if VERBOSE
+      Serial.println("already read message");
+#endif
       break;
     }
     (*myMotor).last_erpm_time = (*myMotor).erpm_time;
@@ -117,17 +123,17 @@ void update_esc_status_control() { // updates the esc status variables for
     (*myMotor).current =
         static_cast<float>(((int16_t)(msgBuffer[0][7] << 8) | msgBuffer[0][8])) / 10.0;
 
-
     // go to the previous message
     msgId--;
-    newMsg=true;
+    newMsg = true;
     // if msgId is out of bounds, set it to the last element
-    if (msgId > RX_MSG_BUFFER_LEN - 1) {
+    if (msgId > RX_MSG_BUFFER_LEN - 1)
+    {
       msgId = RX_MSG_BUFFER_LEN - 1;
     }
-    #if VERBOSE
-      Serial.println("SUCCESS");
-    #endif
+#if VERBOSE
+    Serial.println("SUCCESS");
+#endif
   }
 }
 
@@ -136,22 +142,28 @@ void update_esc_status_control() { // updates the esc status variables for
 
 //   ezek nem jok >>  if [0] == 16 command id, [1] rx id, [2-3] fet temp*10,
 //   [4-5] motor temp*10, [6-7] current in*10, [8-9] pid pos*50],
-void update_esc_status_log() {
+void update_esc_status_log()
+{
   byte esc_stat = 0; // byte to store whether the escs are updated or not
   uint8_t msgId = msgCount % RX_MSG_BUFFER_LEN;
   uint8_t count = 0;
-  while (esc_stat != 0x0f && count <= RX_MSG_BUFFER_LEN) {
-    if (msgBuffer[msgId][0] != 0x09) {
+  while (esc_stat != 0x0f && count <= RX_MSG_BUFFER_LEN)
+  {
+    if (msgBuffer[msgId][0] != 0x09)
+    {
       msgId--;
-      if (msgId > RX_MSG_BUFFER_LEN - 1) {
+      if (msgId > RX_MSG_BUFFER_LEN - 1)
+      {
         msgId = RX_MSG_BUFFER_LEN - 1;
       }
       count++;
       continue;
     }
 
-    if (msgBuffer[msgId][12] == 1) { // if the message is a read message
-      switch (msgBuffer[msgId][1]) {
+    if (msgBuffer[msgId][12] == 1)
+    { // if the message is a read message
+      switch (msgBuffer[msgId][1])
+      {
       case 0x35:
         esc_stat |= 0b00000001;
         break;
@@ -168,16 +180,19 @@ void update_esc_status_log() {
         break;
       }
       msgId--;
-      if (msgId > RX_MSG_BUFFER_LEN - 1) {
+      if (msgId > RX_MSG_BUFFER_LEN - 1)
+      {
         msgId = RX_MSG_BUFFER_LEN - 1;
       }
       count++;
       continue;
     }
 
-    if (msgBuffer[msgId][0] == 0x16) {
+    if (msgBuffer[msgId][0] == 0x16)
+    {
       esc *myMotor;
-      switch (msgBuffer[msgId][1]) {
+      switch (msgBuffer[msgId][1])
+      {
       case 0x35:
         myMotor = &vescFL;
       case 0x4D:

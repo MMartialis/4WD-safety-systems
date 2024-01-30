@@ -45,24 +45,31 @@
 #define SD_CS_PIN 17
 
 #define MOTOR_EFFICIENCY 0.85
-// #define WHEEL_RADIUS 0.095                     // meters
-// #define WHEEL_DIAMETER WHEEL_RADIUS * 2        // meters
-// #define WHEEL_CIRCUMFERENCE WHEEL_DIAMETER *PI // meters
+#define WHEEL_RADIUS 0.095                     // meters
+#define WHEEL_DIAMETER WHEEL_RADIUS * 2        // meters
+#define WHEEL_CIRCUMFERENCE WHEEL_DIAMETER * PI // meters
 #define POLE_PAIR_COUNT 7
 #define GEAR_RATIO_FRONT 3.6
 #define GEAR_RATIO_REAR 5.2
-// #define ERPM_TO_MPS_FRONT WHEEL_CIRCUMFERENCE / (POLE_PAIR_COUNT * GEAR_RATIO_FRONT * 60)
-// #define ERPM_TO_MPS_REAR WHEEL_CIRCUMFERENCE / (POLE_PAIR_COUNT * GEAR_RATIO_REAR * 60)
-// #define AXLE_WIDTH 0.338               // meters
-// #define HALF_AXLE_WIDTH AXLE_WIDTH / 2 // meters
-// #define ERPM_TO_MOTOR_RPM 1 / POLE_PAIR_COUNT
+
+
+#define RATIO_F2R_L GEAR_RATIO_FRONT*KV_FL/GEAR_RATIO_REAR/KV_RL
+#define RATIO_F2R_R GEAR_RATIO_FRONT*KV_FR/GEAR_RATIO_REAR/KV_RR
+#define RATIO_R2F_L GEAR_RATIO_REAR*KV_RL/GEAR_RATIO_FRONT/KV_FL
+#define RATIO_R2F_R GEAR_RATIO_REAR*KV_RR/GEAR_RATIO_FRONT/KV_FR
+
+#define ERPM_TO_MPS_FRONT WHEEL_CIRCUMFERENCE / (POLE_PAIR_COUNT * GEAR_RATIO_FRONT * 60)
+#define ERPM_TO_MPS_REAR WHEEL_CIRCUMFERENCE / (POLE_PAIR_COUNT * GEAR_RATIO_REAR * 60)
+#define AXLE_WIDTH 0.338               // meters
+#define HALF_AXLE_WIDTH AXLE_WIDTH / 2 // meters
+#define ERPM_TO_MOTOR_RPM 1 / POLE_PAIR_COUNT
 
 // if csúszik v1
-// #define MAGIC_TRESHOLD 0.5               // m/s
-// #define IS_SLIDING_THRESHOLD_FRONT 0.2   // unit: I have no idea, please ask about this in the exam :D
-// #define IS_SLIDING_THRESHOLD_REAR 0.2    // unit: I have no idea
-// #define REAR_TRACTION_CONTROL_TIMEOUT 0  // milliseconds
-// #define FRONT_TRACTION_CONTROL_TIMEOUT 0 // milliseconds
+#define MAGIC_TRESHOLD 0.5               // m/s
+#define IS_SLIDING_THRESHOLD_FRONT 0.2   // unit: I have no idea, please ask about this in the exam :D
+#define IS_SLIDING_THRESHOLD_REAR 0.2    // unit: I have no idea
+#define REAR_TRACTION_CONTROL_TIMEOUT 0  // milliseconds
+#define FRONT_TRACTION_CONTROL_TIMEOUT 0 // milliseconds
 
 // if csúszik v2
 #define MAX_AXLE_DIFFERENCE 0.5 // m/s
@@ -94,5 +101,6 @@
 #define BETA_MULTIPLIER_RL 1000000.0 * KV_RL *ANGULAR_MOMENTUM_RL / POLE_PAIR_COUNT / GEAR_RATIO_REAR / GEAR_RATIO_REAR / MOTOR_EFFICIENCY   // this either
 #define BETA_MULTIPLIER_RR 1000000.0 * KV_RR *ANGULAR_MOMENTUM_RR / POLE_PAIR_COUNT / GEAR_RATIO_REAR / GEAR_RATIO_REAR / MOTOR_EFFICIENCY   // this either
 
-#define CHOOSE_TRACTION_CONTROL_VERSION 2
+#define CHOOSE_TCS_IS_SLIDING_VERSION 2
+#define CHOOSE_TCS_DONT_VERSION 1
 #endif

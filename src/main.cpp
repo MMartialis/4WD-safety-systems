@@ -222,24 +222,24 @@ void loop()
   if (sliding)
   {
 //--------------------------------v1---------------------------------------------------
-#if CHOOSE_TRACTION_CONTROL_VERSION == 1
+#if CHOOSE_TCS_DONT_VERSION == 1
     if (sliding == 1)
     { // sliding front
-      comm_can_set_rpm(FL_ID, vescRL.erpm);
-      comm_can_set_rpm(FR_ID, vescRR.erpm);
+      comm_can_set_rpm(FL_ID, vescRL.erpm * RATIO_R2F_L);
+      comm_can_set_rpm(FR_ID, vescRR.erpm * RATIO_R2F_R);
       comm_can_set_current(RL_ID, currentRL);
       comm_can_set_current(RR_ID, currentRR);
     }
     else if (sliding == 2)
     {
-      comm_can_set_rpm(RL_ID, vescFL.erpm);
-      comm_can_set_rpm(RR_ID, vescFR.erpm);
+      comm_can_set_rpm(RL_ID, vescFL.erpm * RATIO_F2R_L);
+      comm_can_set_rpm(RR_ID, vescFR.erpm * RATIO_F2R_R);
       comm_can_set_current(FL_ID, currentFL);
       comm_can_set_current(FR_ID, currentFR);
     }
 
 //--------------------------------v2---------------------------------------------------
-#elif CHOOSE_TRACTION_CONTROL_VERSION == 2
+#else if CHOOSE_TCS_DONT_VERSION == 2
     double angular_accelaration_fl = ((vescFL.erpm - vescFL.last_erpm) / (vescFL.last_erpm_time - vescFL.erpm_time));
     double angular_accelaration_fr = ((vescFR.erpm - vescFR.last_erpm) / (vescFR.last_erpm_time - vescFR.erpm_time));
     double angular_accelaration_rl = ((vescRL.erpm - vescRL.last_erpm) / (vescRL.last_erpm_time - vescRL.erpm_time));
@@ -281,7 +281,7 @@ void loop()
 float if_sliding()
 { // 0: no sliding/both/any axle straight, 1: front sliding, 2: rear sliding
 
-#if CHOOSE_TRACTION_CONTROL_VERSION == 1
+#if CHOOSE_TCS_IS_SLIDING_VERSION == 1
   //--------------------------------v1---------------------------------------------------
   double v_fl = vescFL.erpm * ERPM_TO_MPS_FRONT;
   double v_fr = vescFR.erpm * ERPM_TO_MPS_FRONT;
@@ -307,14 +307,14 @@ float if_sliding()
     return 0;
   }
 
-#else if CHOOSE_TRACTION_CONTROL_VERSION == 2
+#else if CHOOSE_TCS_IS_SLIDING_VERSION == 2
   //--------------------------------v2---------------------------------------------------
   if (pwm == 0)
   {
     return 0;
   }
 
-  float front_rear_diff = vescFL.erpm + vescFR.erpm - vescRL.erpm - vescRR.erpm;
+  float front_rear_diff = (vescFL.erpm + vescFR.erpm) * ERPM_TO_MPS_FRONT - (vescRL.erpm - vescRR.erpm) * ERPM_TO_MPS_REAR;
   front_rear_diff = (abs(front_rear_diff) > MAX_AXLE_DIFFERENCE) ? front_rear_diff : 0;
   front_rear_diff = (front_rear_diff > 0) - (front_rear_diff < 0);
 
