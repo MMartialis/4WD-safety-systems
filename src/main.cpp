@@ -230,7 +230,7 @@ void loop()
       comm_can_set_current(RL_ID, currentRL);
       comm_can_set_current(RR_ID, currentRR);
     }
-    else if (sliding == 2)
+    else if (sliding == -1)
     {
       comm_can_set_rpm(RL_ID, vescFL.erpm * RATIO_F2R_L);
       comm_can_set_rpm(RR_ID, vescFR.erpm * RATIO_F2R_R);
@@ -279,7 +279,7 @@ void loop()
 }
 
 float if_sliding()
-{ // 0: no sliding/both/any axle straight, 1: front sliding, 2: rear sliding
+{ // 0: no sliding/both/any axle straight, 1: front sliding, -1: rear sliding
 
 #if CHOOSE_TCS_IS_SLIDING_VERSION == 1
   //--------------------------------v1---------------------------------------------------
@@ -300,7 +300,7 @@ float if_sliding()
     float sliding_ratio_front = (sum_abs_v >= MAGIC_TRESHOLD) ? (radious_rear / radious_front) / radious_sum : 0;
     float sliding_ratio_rear = (sum_abs_v >= MAGIC_TRESHOLD) ? (radious_front / radious_rear) / radious_sum : 0;
 
-    return (sliding_ratio_front > IS_SLIDING_THRESHOLD_FRONT) ? (sliding_ratio_rear > IS_SLIDING_THRESHOLD_REAR ? 0 : 2) : (sliding_ratio_rear > IS_SLIDING_THRESHOLD_REAR ? 1 : 0);
+    return (sliding_ratio_front > IS_SLIDING_THRESHOLD_FRONT) ? (sliding_ratio_rear > IS_SLIDING_THRESHOLD_REAR ? 0 : -1) : (sliding_ratio_rear > IS_SLIDING_THRESHOLD_REAR ? 1 : 0);
   }
   catch (const std::exception &e)
   {
@@ -315,6 +315,8 @@ float if_sliding()
   }
 
   float front_rear_diff = (vescFL.erpm + vescFR.erpm) * ERPM_TO_MPS_FRONT - (vescRL.erpm - vescRR.erpm) * ERPM_TO_MPS_REAR;
+
+  Serial.println(front_rear_diff);
   front_rear_diff = (abs(front_rear_diff) > MAX_AXLE_DIFFERENCE) ? front_rear_diff : 0;
   front_rear_diff = (front_rear_diff > 0) - (front_rear_diff < 0);
 
