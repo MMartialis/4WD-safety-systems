@@ -240,21 +240,20 @@ void loop()
 
 //--------------------------------v2---------------------------------------------------
 #else if CHOOSE_TCS_DONT_VERSION == 2
-    double angular_accelaration_fl = ((vescFL.erpm - vescFL.last_erpm) / (vescFL.last_erpm_time - vescFL.erpm_time));
-    double angular_accelaration_fr = ((vescFR.erpm - vescFR.last_erpm) / (vescFR.last_erpm_time - vescFR.erpm_time));
-    double angular_accelaration_rl = ((vescRL.erpm - vescRL.last_erpm) / (vescRL.last_erpm_time - vescRL.erpm_time));
-    double angular_accelaration_rr = ((vescRR.erpm - vescRR.last_erpm) / (vescRR.last_erpm_time - vescRR.erpm_time));
     if (sliding == 1)
     { // sliding front
-      currentFL = vescFL.current + ((erpm_sum < 0) - (erpm_sum > 0)) * (angular_accelaration_rl * REFFERENCE_BETA_MULTIPLIER_FL - angular_accelaration_fl * BETA_MULTIPLIER_FL) * traction_conrtol_gain;
-      currentFR = vescFR.current + ((erpm_sum < 0) - (erpm_sum > 0)) * (angular_accelaration_rr * REFFERENCE_BETA_MULTIPLIER_FR - angular_accelaration_fr * BETA_MULTIPLIER_FR) * traction_conrtol_gain;
-      
+      currentFL = vescFL.current *(MULTIPLIER_FL * (vescRL.erpm - vescRL.last_erpm + vescFL.last_erpm - vescFL.erpm) /
+       DIVIDER_FL * (vescFL.erpm_time - vescFL.last_erpm_time));
+      currentFR = vescFR.current *(MULTIPLIER_FR * (vescRR.erpm - vescRR.last_erpm + vescFR.last_erpm - vescFR.erpm) /
+       DIVIDER_FR * (vescFR.erpm_time - vescFR.last_erpm_time));
     }
     else if (sliding == -1)
-    {
-      currentRL = vescRL.current + ((erpm_sum < 0) - (erpm_sum > 0)) * (angular_accelaration_fl * REFFERENCE_BETA_MULTIPLIER_RL - angular_accelaration_rl * BETA_MULTIPLIER_RL) * traction_conrtol_gain;
-      currentRR = vescRR.current + ((erpm_sum < 0) - (erpm_sum > 0)) * (angular_accelaration_fr * REFFERENCE_BETA_MULTIPLIER_RR - angular_accelaration_rr * BETA_MULTIPLIER_RR) * traction_conrtol_gain;
-    }
+    { // sliding rear
+      currentRL = vescRL.current *(MULTIPLIER_RL * (vescFL.erpm - vescFL.last_erpm + vescRL.last_erpm - vescRL.erpm) /
+        DIVIDER_RL * (vescRL.erpm_time - vescRL.last_erpm_time));
+      currentRR = vescRR.current *(MULTIPLIER_RR * (vescFR.erpm - vescFR.last_erpm + vescRR.last_erpm - vescRR.erpm) /
+        DIVIDER_RR * (vescRR.erpm_time - vescRR.last_erpm_time));
+      }
 
     comm_can_set_current(FL_ID, currentFL);
     comm_can_set_current(FR_ID, currentFR);
